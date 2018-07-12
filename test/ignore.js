@@ -36,7 +36,8 @@ describe('ignore anything but the builtin commands', function() {
         const msg = {
             content: '!team',
             id: '1234',
-            delete: sinon.stub()
+            delete: sinon.stub(),
+            author: { send: sinon.stub() }
         }
         await messageHandler(msg)
 
@@ -47,7 +48,8 @@ describe('ignore anything but the builtin commands', function() {
         const msg = {
             content: '/team',
             id: '1234',
-            delete: sinon.stub()
+            delete: sinon.stub(),
+            author: { send: sinon.stub() }
         }
         await messageHandler(msg)
 
