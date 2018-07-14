@@ -4,7 +4,7 @@ exports.up = function(knex) {
         t.string('id').primary()
         t.timestamps(true, true)
         t.string('user_id').notNullable()
-        t.string('group_id').notNullable()
+        t.string('group_id').nullable()
         t.foreign('user_id').references('id').inTable('user')
         t.foreign('group_id').references('id').inTable('group')
     })

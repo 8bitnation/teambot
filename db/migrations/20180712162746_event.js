@@ -5,8 +5,10 @@ exports.up = function(knex) {
         t.timestamps(true, true)
         t.string('name').notNullable()
         t.string('owner_id').notNullable()
-        t.timestamp('starting_at')
+        t.string('group_id').notNullable()
+        t.timestamp('when')
         t.foreign('owner_id').references('id').inTable('user')
+        t.foreign('group_id').references('id').inTable('group')
     })
 }
 

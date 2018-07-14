@@ -9,8 +9,6 @@ const Token = require('./db/token')
 const User = require('./db/user')
 const Group = require('./db/group')
 
-
-
 // we have to be able to test this async, so we explicitly define and export it
 async function messageHandler(msg) {
     if(['/team', '!team'].some( cmd => msg.content.startsWith(cmd)) ) {
