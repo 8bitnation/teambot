@@ -12,7 +12,10 @@
     "discord.js": "^11.3.2",
     "dotenv": "^6.0.0",
     "eslint": "^5.0.1",
+    "knex": "^0.15.0",
+    "objection": "^1.1.10",
     "sinon": "^6.1.3",
+    "sqlite3": "^4.0.1",
     "uws": "^10.148.1",
     "winston": "^3.0.0"
   },
@@ -20,7 +23,8 @@
     "mocha": "^5.2.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --exit",
+    "knex": "knex"
   },
   "repository": {
     "type": "git",

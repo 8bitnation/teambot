@@ -32,24 +32,26 @@ describe('ignore anything but the builtin commands', function() {
 
     })
 
-    it('shound not ignore !team', async function() {
+    it('should not ignore !team', async function() {
         const msg = {
             content: '!team',
             id: '1234',
             delete: sinon.stub(),
-            author: { send: sinon.stub() }
+            author: { id: '4567', send: sinon.stub() },
+            channel: { id: '3456', name: 'destiny_lfg' }
         }
         await messageHandler(msg)
 
         expect(msg.delete.called).to.be.true 
     })
 
-    it('shound not ignore /team', async function() {
+    it('should not ignore /team', async function() {
         const msg = {
             content: '/team',
             id: '1234',
             delete: sinon.stub(),
-            author: { send: sinon.stub() }
+            author: { id: '4567', send: sinon.stub() },
+            channel: { id: '3456', name: 'destiny_lfg' }
         }
         await messageHandler(msg)
 

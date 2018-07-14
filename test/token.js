@@ -4,6 +4,7 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
 const logger = require('../app/util/logger')
+const db = require('./support/db')
 logger.transports.forEach((t) => (t.silent = true))
 
 describe('generate token', function() {
@@ -11,21 +12,23 @@ describe('generate token', function() {
     //const Discord = require('discord.js')
     const { messageHandler } = require('../app') // setup the listeners
     const sandbox = require('sinon').createSandbox()
-    beforeEach(function() {
-        
+    beforeEach(async function() {
+        await db.init()
     })
 
     afterEach(function() {
         sandbox.restore()
     })
 
-    it('shounld send a DM with a token', async function() {
+    it('should send a DM with a token', async function() {
         process.env.HOST_URL = 'http://127.0.0.1:1234'
         const msg = {
             content: '!team',
             id: '1234',
             delete: sinon.stub(),
-            author: { send: sinon.stub() }
+            author: { id: '4567', send: sinon.stub(), username: 'testuser' },
+            member: { nickname: 'testusernick' },
+            channel: { id: '3456', name: 'destiny_lfg' }
         }
         await messageHandler(msg)
 

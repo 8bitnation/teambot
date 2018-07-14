@@ -58,4 +58,5 @@ typings/
 .env
 
 .vscode
+db/*.sqlite
 
