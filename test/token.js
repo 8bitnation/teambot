@@ -10,7 +10,7 @@ logger.transports.forEach((t) => (t.silent = true))
 describe('generate token', function() {
 
     //const Discord = require('discord.js')
-    const { messageHandler } = require('../app') // setup the listeners
+    const { messageHandler } = require('../app/discord') // setup the listeners
     const sandbox = require('sinon').createSandbox()
     beforeEach(async function() {
         await db.init()
