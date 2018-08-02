@@ -53,7 +53,7 @@ function login(token) {
 
     const p = new Promise((resolve, reject) => {
         client.once('ready', () => {
-            logger.info(`Logged in as ${client.user.tag}!`)
+            logger.info(`Logged in as ${client.user.tag}`)
             // if no guild is specified, get the first one
             if(!process.env.DISCORD_GUILD) {
                 const g = client.guilds.first()

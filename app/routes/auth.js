@@ -1,0 +1,20 @@
+'use strict'
+
+const logger = require('../util/logger')
+const Router = require('koa-router')
+const Token = require('../db/token')
+const { HTTP_UNAUTHORIZED } = require('../util/const')
+
+const router = new Router({ prefix: '/auth' })
+
+router.get('/:token', async function(ctx) {
+    // lookup the token
+    logger.debug('%s retrieving token %s', ctx.id, ctx.params.token)
+
+    const token = await Token.query().findById(ctx.params.token)
+
+    if(!token) ctx.throw(HTTP_UNAUTHORIZED)
+
+})
+
+module.exports = router.routes()

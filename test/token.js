@@ -3,15 +3,14 @@
 /* eslint-disable no-unused-expressions */
 const { expect } = require('chai')
 const sinon = require('sinon')
-const logger = require('../app/util/logger')
 const db = require('./support/db')
-logger.transports.forEach((t) => (t.silent = true))
+require('./support/logger')
 
-describe('generate token', function() {
+describe('token', function() {
 
     //const Discord = require('discord.js')
     const { messageHandler } = require('../app/discord') // setup the listeners
-    const sandbox = require('sinon').createSandbox()
+    const sandbox = sinon.createSandbox()
     beforeEach(async function() {
         await db.init()
     })
