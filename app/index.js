@@ -6,6 +6,7 @@ const discord = require('./discord')
 const db = require('./db')
 const Koa = require('koa')
 const http = require('http')
+const path = require('path')
 const { promisify } = require('util')
 
 process.on('unhandledRejection', (reason) => { 
@@ -18,12 +19,11 @@ async function startHttpServer() {
 
     const app = new Koa()
     app.use(require('./middleware/logger'))
-    app.use(require('koa-static')('static'))
+    app.use(require('koa-static')(path.join(__dirname, 'static') ))
+    app.use(require('./routes/auth'))
+
     const server = http.createServer(app.callback())
     const DEFAULT_PORT = 3000
-
-
-    app.use(require('./routes/auth'))
 
     const listen = promisify(server.listen.bind(server))
     // eslint-disable-next-line eqeqeq, no-eq-null
