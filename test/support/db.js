@@ -20,5 +20,36 @@ async function init() {
     return knex
 }
 
-module.exports = { init }
+async function createToken(opts) {
+
+    const token = Object.assign({}, opts)
+
+    if(!token.user_id) {
+        const user = await createUser()
+        token.user_id = user.id
+    }
+
+    return db.Token.query().insert(token)
+}
+
+function createGroup(opts) {
+    const group = Object.assign({
+        id: 'test-group-1',
+        name: 'test-group'
+    }, opts)
+
+    return db.Group.query().insert(group)
+
+}
+
+function createUser(opts) {
+    const user = Object.assign({
+        id: 'test-user-1',
+        name: 'test-user'
+    }, opts)
+
+    return db.User.query().insert(user)
+}
+
+module.exports = { init, createGroup, createToken, createUser }
 

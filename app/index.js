@@ -17,8 +17,11 @@ async function startHttpServer() {
     if(!process.env.HOST_URL) throw new Error('process.env.HOST_URL is not set')
 
     const app = new Koa()
+    app.use(require('./middleware/logger'))
+    app.use(require('koa-static')('static'))
     const server = http.createServer(app.callback())
     const DEFAULT_PORT = 3000
+
 
     app.use(require('./routes/auth'))
 

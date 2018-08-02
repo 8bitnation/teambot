@@ -20,7 +20,8 @@ function request(opts) {
     return axios.create(Object.assign({
         baseURL: process.env.HOST_URL,
         // have every response resolve a promise
-        validateStatus: null
+        validateStatus: null,
+        maxRedirects: 0
     }, opts))
 }
 
