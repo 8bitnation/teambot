@@ -7,7 +7,6 @@ class Event extends Model {
         return 'event'
     }
 
-
     static get relationMappings() {
         const User = require('./user')
         const Group = require('./group')

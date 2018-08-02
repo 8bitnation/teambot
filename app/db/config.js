@@ -9,6 +9,9 @@ module.exports = {
     migrations: {
         directory: 'db/migrations'
     },
+    seeds: {
+        directory: 'db/seeds'
+    },
     pool: {
         afterCreate: (conn, cb) => conn.run('PRAGMA foreign_keys = ON', cb)
     },

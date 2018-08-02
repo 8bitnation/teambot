@@ -1,3 +1,3 @@
 'use strict'
 
-module.exports = require('./app/db/index').config
+module.exports = require('./app/db/config')
