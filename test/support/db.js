@@ -2,6 +2,7 @@
 /* eslint-disable no-await-in-loop */
 
 const db = require('../../app/db')
+const Group = require('../../app/db/group')
 const config = Object.assign({}, require('../../app/db/config'))
 config.connection.filename = 'db/test.sqlite'
 
@@ -20,5 +21,5 @@ async function init() {
     return knex
 }
 
-module.exports = { init }
+module.exports = { init, Group }
 

@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const logger = require('../app/util/logger')
 logger.transports.forEach((t) => (t.silent = true))
 
-describe('ignore anything but the builtin commands', function() {
+describe('ignore', function() {
 
     //const Discord = require('discord.js')
     const { messageHandler } = require('../app/discord') // setup the listeners

@@ -7,7 +7,7 @@ const logger = require('../app/util/logger')
 const db = require('./support/db')
 logger.transports.forEach((t) => (t.silent = true))
 
-describe('token', function() {
+describe('group', function() {
 
     //const Discord = require('discord.js')
     const { messageHandler } = require('../app/discord') // setup the listeners
@@ -20,7 +20,7 @@ describe('token', function() {
         sandbox.restore()
     })
 
-    it('should send a DM with a token', async function() {
+    it('should create a new group', async function() {
         process.env.HOST_URL = 'http://127.0.0.1:1234'
         const msg = {
             content: '!team',
@@ -32,9 +32,10 @@ describe('token', function() {
         }
         await messageHandler(msg)
 
-        expect(msg.delete.called).to.be.true
-        expect(msg.author.send.called).to.be.true
-        expect(msg.author.send.calledWith(sinon.match(process.env.HOST_URL+'/auth/'))).to.be.true
+        const group = await db.Group.query().findById('3456')
+
+        expect(group).to.exist
+        expect(group.id).to.equal('3456')
     })
 
 })
