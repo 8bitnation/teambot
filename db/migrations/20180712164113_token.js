@@ -1,7 +1,7 @@
 'use strict'
 exports.up = function(knex) {
     return knex.schema.createTable('token', function (t) {
-        t.string('id').primary()
+        t.string('id').primary().notNullable()
         t.timestamps(true, true)
         t.string('user_id').notNullable()
         t.string('group_id').nullable()

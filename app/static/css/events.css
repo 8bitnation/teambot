@@ -1,0 +1,142 @@
+[v-cloak] {
+  display: none;
+}
+
+body {
+  font-family: monospace;
+}
+
+option {
+  font-family: monospace;
+}
+
+.in-progress {
+  cursor: wait;
+}
+
+.title {
+  font-size: 30px;
+  text-align: center;
+}
+
+.app {
+  max-width: 1000px;
+  /* overflow: auto; /**/
+  margin: auto;
+}
+
+.channel {
+  font-size: 22px;
+  color: white;
+  background-color: black;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.channel-title {
+  text-align: center;
+}
+
+.channel-count {
+  text-align: right;
+}
+
+
+.event {
+  background-color: dimgray;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 2px;
+}
+
+.event-header {
+  font-size: 20px;
+  color: white;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.event-name {
+  font-weight: bold;
+}
+
+.event-date {
+  text-align: right;
+  font-size: 18px;
+}
+
+.tz-warning {
+  color: darkorange;
+}
+
+.picker {
+  margin-top: 10px;
+}
+
+.event-count {
+  text-align: right;
+  font-size: 18px;
+}
+
+.event-new {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.participant-list {
+  font-size: 16px;
+  color: whitesmoke;
+  margin-top: 4px;
+}
+
+.participant {
+  font-size: 16px;
+  background-color: white;
+  color: black;
+  border-radius: 3px;
+  padding: 8px;
+  margin-top: 4px;
+  overflow: auto;
+  cursor: pointer;
+}
+
+.leave {
+  float: right;
+  color: red;
+}
+
+.join {
+  color: green;
+}
+
+
+.error {
+  z-index: 1; /* Sit on top */
+  overflow: hidden;
+  background-color: red;
+  position: fixed; /* Set the error div to fixed position */
+  top: 0; /* Position the error div at the top of the page */
+  /* width: 1000px; /**/
+  color: white;
+}
+
+.error-message {
+  font-size: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.error-detail {
+  font-size: 14px;
+  background-color: red;
+  color: white;
+  border: none; 
+}
+
+.warning {
+  background-color: darkorange;
+  color: white;
+}
