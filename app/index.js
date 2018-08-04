@@ -8,6 +8,7 @@ const Koa = require('koa')
 const http = require('http')
 const path = require('path')
 const { promisify } = require('util')
+const socket = require('./socket')
 
 process.on('unhandledRejection', (reason) => { 
     throw reason 
@@ -23,8 +24,10 @@ async function startHttpServer() {
     app.use(require('./routes/auth'))
 
     const server = http.createServer(app.callback())
-    const DEFAULT_PORT = 3000
+    // register the socket handler
+    socket(server)
 
+    const DEFAULT_PORT = 3000
     const listen = promisify(server.listen.bind(server))
     // eslint-disable-next-line eqeqeq, no-eq-null
     const port = process.env.PORT || DEFAULT_PORT
