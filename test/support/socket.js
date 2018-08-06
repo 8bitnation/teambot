@@ -7,25 +7,28 @@ class SocketHelper {
     connect(url) {
         return new Promise( (resolve) => {
             this.socket = io(url, {forceNew: true})
-            this.socket.on('token', resolve)
+            this.socket.once('token', resolve)
         })
     }
 
     connectAndEvents(url) {
         return new Promise( (resolve) => {
             this.socket = io(url, {forceNew: true})
-            this.socket.on('events', resolve)
+            this.socket.once('events', resolve)
         })
     }
 
     events() {
         return new Promise( (resolve) => {
-            this.socket.on('events', resolve)
+            this.socket.once('events', resolve)
         })
     }
 
-    add(event) {
-        this.socket.emit('add', event)
+    create(event) {
+        return new Promise( (resolve) => {
+            this.socket.once('events', resolve)
+            this.socket.emit('create', event)
+        })
     }
 }
 

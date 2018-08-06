@@ -1,5 +1,5 @@
 'use strict'
-const { Model } = require('objection')
+const { Model, transaction } = require('objection')
 
 const config = require('./config')
 const Knex = require('knex')
@@ -20,3 +20,4 @@ module.exports.Token = require('./token')
 module.exports.User = require('./user')
 module.exports.Group = require('./group')
 module.exports.Event = require('./event')
+module.exports.transaction = transaction

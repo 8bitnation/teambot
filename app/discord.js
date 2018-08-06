@@ -8,6 +8,7 @@ const { format } = require('util')
 const Token = require('./db/token')
 const User = require('./db/user')
 const Group = require('./db/group')
+const Event = require('./db/event')
 
 const LFG_SUFFIX = '_lfg'
 
@@ -97,6 +98,31 @@ async function games(user_id) {
 
 }
 
+async function updateEventMessage(trx, event, message) {
+    const guild = client.guilds.get(process.env.DISCORD_GUILD)
+    if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
+
+    const channel = guild.channels.get(event.channel_id)
+    if(!channel) return logger.error('updateEventMessage: failed to find channel %s', event.channel_id)
+
+    if(event.message_id) {
+        const prev_message = await channel.fetchMessage(event.message_id)
+        if(prev_message) await prev_message.delete()
+    }
+
+    const new_message = await channel.sendMessage(message)
+
+    await Event.query(trx).update({ message_id: new_message.id }).where({ id: event.id, message_id: event.message_id })
+
+}
+
+
+async function sendCreateMessage(trx, event) {
+    // build a message
+
+    await updateEventMessage(trx, event, 'created event')
+}
+
 /**
  * we have to be able to test this async, so we explicitly define and export it
  */
@@ -166,4 +192,6 @@ function login(token) {
 
 module.exports = { 
     login, messageHandler,
-    guildRoles, syncChannels, platforms, games, lfgChannels }
+    guildRoles, syncChannels, platforms, games, lfgChannels,
+    sendCreateMessage
+}

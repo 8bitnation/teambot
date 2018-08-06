@@ -44,8 +44,8 @@ module.exports = function(server) {
         socket.emit('events', await state.events())
 
         // 
-        socket.on('add', async function(event) {
-            await state.addEvent(event)
+        socket.on('create', async function(event) {
+            await state.createEvent(event)
             ee.emit('update')
         })
 

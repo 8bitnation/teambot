@@ -7,6 +7,7 @@ exports.up = function(knex) {
         t.string('owner_id').notNullable()
         t.string('group_id').notNullable()
         t.string('platform_id').notNullable()
+        t.string('message_id')
         t.timestamp('when')
         t.foreign('owner_id').references('id').inTable('user')
         t.foreign('group_id').references('id').inTable('group')

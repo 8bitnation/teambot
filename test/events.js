@@ -6,6 +6,7 @@ const sinon = require('sinon')
 const http = require('./support/http')
 const db = require('./support/db')
 const SocketHelper = require('./support/socket')
+const discord = require('../app/discord')
 require('./support/logger')
 
 const { HTTP_OK } = require('../app/util/const')
@@ -56,41 +57,69 @@ describe('events', function() {
 
     })
 
-    it.skip('should send a create message', async function() {
+    it('should send a create message', async function() {
+
+        sandbox.stub(discord, 'sendCreateMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
         // create the event
+        await s1.create({ id: 1, name: 'test event', platform_id: 'PC', owner_id: 'u1', group_id: '1' })
         // check that we sent a create message
+
+        expect(discord.sendCreateMessage.callCount).to.equal(1)
+
     })
 
     it.skip('should send a join message', async function() {
+
+        // create user1
         // create the event
-        // join another user
+        // create user2
+        // join user2
         // check that we sent a join message
     })
 
     it.skip('should send a leave message', async function() {
+        // create user 1
         // create the event
-        // join another user
-        // leave other user
+        // create user2
+        // join user2
+        // leave user2
         // check that we sent a leave message
     })
 
     it.skip('should send a delete message', async function() {
+
+        // create user1
         // create the event
-        // then leave it
+        // leave user1
 
         // check that we did not send a leave message
         // check that we sent a delete message
     })
 
     it.skip('should promote the next user when the owner leaves', async function() {
+
+        // create user1
         // create the event
-        // join another user
-        // owner leaves
+        // create user2
+        // join user2
+        // leave user1
         // check that we did not send a leave message
         // check that we sent a promote message
+        // check that user2 is owner
     })
 
     it('should broadcast an update after an event is created', async function() {
+
+        sandbox.stub(discord, 'sendCreateMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
 
         await db.createUser({ id: 'u1', name: 'user1' })
         const t1 = await db.createToken({ user_id: 'u1' })
@@ -107,11 +136,9 @@ describe('events', function() {
         const s3 = new SocketHelper()
         await s3.connectAndEvents(process.env.HOST_URL + '/events?token=' + t3.id)
 
-
-        s1.add({ id: 1 })
-
+        // create the event and await the update
         const res = await Promise.all([
-            s1.events(), s2.events(), s3.events()
+            s2.events(), s3.events(), s1.create({ id: 1, name: 'test event', platform_id: 'PC', owner_id: 'u1', group_id: '1' })
         ])
 
         expect(res).to.exist
@@ -119,7 +146,7 @@ describe('events', function() {
     })
 
     it.skip('should broadcast an update after an event is joined', async function() {
-        
+
     })
 
     it.skip('should broadcast an update after an event is left', async function() {

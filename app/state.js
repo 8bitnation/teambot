@@ -1,6 +1,6 @@
 'use strict'
 
-const { Event } = require('./db')
+const { Event, transaction } = require('./db')
 const discord = require('./discord')
 
 async function events(token) {
@@ -14,10 +14,27 @@ async function events(token) {
     return {}
 }
 
-async function addEvent() {
+async function createEvent(e) {
+
+    // creating an event does not require a transaction, however we still 
+    // use one because the message update functions require it
+
+    const knex = Event.knex()
+    await transaction(knex, async(trx) => {
+        const event = await Event.query(trx).insert(e)
+        await discord.sendCreateMessage(trx, event)
+    })
+
+}
+
+async function joinEvent() {
+
+}
+
+async function leaveEvent() {
 
 }
 
 module.exports = {
-    events, addEvent
+    events, createEvent, joinEvent, leaveEvent
 }
