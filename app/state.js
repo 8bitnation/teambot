@@ -14,14 +14,16 @@ async function events(token) {
     return {}
 }
 
-async function createEvent(e) {
+async function createEvent(token, e) {
 
     // creating an event does not require a transaction, however we still 
     // use one because the message update functions require it
 
     const knex = Event.knex()
     await transaction(knex, async(trx) => {
-        const event = await Event.query(trx).insert(e)
+
+        e.users = [ { id: token.user_id } ]
+        const event = await Event.query(trx).insertGraph(e, { relate: true })
         await discord.sendCreateMessage(trx, event)
     })
 

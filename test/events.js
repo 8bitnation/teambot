@@ -57,7 +57,7 @@ describe('events', function() {
 
     })
 
-    it('should send a create message', async function() {
+    it.only('should send a create message', async function() {
 
         sandbox.stub(discord, 'sendCreateMessage')
         // create group
@@ -68,7 +68,7 @@ describe('events', function() {
         const s1 = new SocketHelper()
         await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
         // create the event
-        await s1.create({ id: 1, name: 'test event', platform_id: 'PC', owner_id: 'u1', group_id: '1' })
+        await s1.create({ id: 1, name: 'test event', platform_id: 'PC', group_id: '1' })
         // check that we sent a create message
 
         expect(discord.sendCreateMessage.callCount).to.equal(1)
@@ -138,7 +138,7 @@ describe('events', function() {
 
         // create the event and await the update
         const res = await Promise.all([
-            s2.events(), s3.events(), s1.create({ id: 1, name: 'test event', platform_id: 'PC', owner_id: 'u1', group_id: '1' })
+            s2.events(), s3.events(), s1.create({ id: 1, name: 'test event', platform_id: 'PC', group_id: '1' })
         ])
 
         expect(res).to.exist

@@ -45,17 +45,17 @@ module.exports = function(server) {
 
         // 
         socket.on('create', async function(event) {
-            await state.createEvent(event)
+            await state.createEvent(token, event)
             ee.emit('update')
         })
 
         socket.on('join', async function(event) {
-            await state.joinEvent(event)
+            await state.joinEvent(token, event)
             ee.emit('update')
         })
 
         socket.on('leave', async function(event) {
-            await state.leaveEvent(event)
+            await state.leaveEvent(token, event)
             ee.emit('update')
         })
 
