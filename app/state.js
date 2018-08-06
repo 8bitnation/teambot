@@ -7,10 +7,10 @@ async function events(token) {
     // get a list of events that are visible for the roken
 
     // first we get the roles the user has
-    const roles = await discord.roles(token.user_id)
+    //const roles = await discord.roles(token.user_id)
 
 
-    await Event.query()
+    //await Event.query()
     return {}
 }
 

@@ -9,21 +9,66 @@ const Token = require('./db/token')
 const User = require('./db/user')
 const Group = require('./db/group')
 
+const LFG_SUFFIX = '_lfg'
+
 /**
  * look for every _lfg channel and add it to the possible target list
  */
 async function syncChannels() {
-    
+
+    const SUFFIX = '_lfg'
+
+    // we want to be able to stub these functions
+    // so we need to reference them via the module.exports
+    const lfg = module.exports.lfgChannels()
+    const roles = module.exports.guildRoles()
+
+    // loop through each channel and see if there is a corresponding role
+
+    for (let l of lfg) {
+        const name = l.name.slice(0, -SUFFIX.length).replace(/_/g, ' ').toLowerCase()
+        // do we have a role?
+        const role = roles.find( r => r.name.replace(/_/g, ' ').toLowerCase() === name )
+        if(role) {
+            logger.debug('synchronising channel %s / %s', l.name, name)
+            // check if the channel exists in the DB
+
+            // no need to rush
+            // eslint-disable-next-line no-await-in-loop
+            const group = await Group.query().findById(l.id)
+
+            if(!group) {
+                logger.info('creating group %s', name)
+                // eslint-disable-next-line no-await-in-loop
+                await Group.query().insert({ id: l.id, name })
+            }
+
+        }
+    } 
+
 }
 
+/**
+ * Return a list of roles for the guild
+ * @param {*} user_id 
+ */
+function guildRoles() {
+    const guild = client.guilds.get(process.env.DISCORD_GUILD)
+    if(!guild) return []
+
+    return guild.roles.array()
+}
+
+/**
+ * return an array of channels ending with _lfg
+ */
 function lfgChannels() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const lfg = guild.channels.findAll( ch => ch.name.endsWith('_lfg'))
+    const lfg = guild.channels.findAll( ch => ch.name.endsWith(LFG_SUFFIX))
 
     return lfg
-
 }
 
 /**
@@ -74,13 +119,11 @@ async function messageHandler(msg) {
                 id: msg.author.id,
                 name: msg.member.nickname || msg.author.username
             }, { insertMissing: true })
-            const group = await Group.query().upsertGraph({
-                id: msg.channel.id,
-                name: msg.channel.name
-            }, { insertMissing: true })
+
+            // check if the group exists first
             const token = await Token.query().insert({
                 user_id: user.id,
-                group_id: group.id
+                group_id: null
             })
 
             await msg.author.send('Please click on the following link to use the team tool: ' + 
@@ -119,4 +162,6 @@ function login(token) {
     return p
 }
 
-module.exports = { login, messageHandler, syncChannels, platforms, games, lfgChannels }
+module.exports = { 
+    login, messageHandler,
+    guildRoles, syncChannels, platforms, games, lfgChannels }

@@ -5,13 +5,12 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const logger = require('../app/util/logger')
 const db = require('./support/db')
+const discord = require('../app/discord')
 logger.transports.forEach((t) => (t.silent = true))
 
 describe('group', function() {
 
-    //const Discord = require('discord.js')
-    const { messageHandler } = require('../app/discord') // setup the listeners
-    const sandbox = require('sinon').createSandbox()
+    const sandbox = sinon.createSandbox()
     beforeEach(async function() {
         await db.init()
     })
@@ -21,21 +20,20 @@ describe('group', function() {
     })
 
     it('should create a new group', async function() {
-        process.env.HOST_URL = 'http://127.0.0.1:1234'
-        const msg = {
-            content: '!team',
-            id: '1234',
-            delete: sinon.stub(),
-            author: { id: '4567', send: sinon.stub(), username: 'testuser' },
-            member: { nickname: 'testusernick' },
-            channel: { id: '3456', name: 'destiny_lfg' }
-        }
-        await messageHandler(msg)
 
-        const group = await db.Group.query().findById('3456')
+        sandbox.stub(discord, 'lfgChannels').returns([
+            { id: '1', name: 'destiny_lfg' }
+        ])
 
+        sandbox.stub(discord, 'guildRoles').returns([
+            { id: '1', name: 'Destiny' }
+        ])
+
+        await discord.syncChannels()
+
+        const group = await db.Group.query().findById('1')
         expect(group).to.exist
-        expect(group.id).to.equal('3456')
+        expect(group.name).to.equal('destiny')
     })
 
 })

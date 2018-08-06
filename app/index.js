@@ -43,6 +43,8 @@ async function start() {
         await db().migrate.latest()
         logger.info('Logging into discord')
         await discord.login(process.env.DISCORD_TOKEN)
+        logger.info('syncronising channels')
+        await discord.syncChannels()
         logger.info('Starting HTTP service')
         await startHttpServer()
 
