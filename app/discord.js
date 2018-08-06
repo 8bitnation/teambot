@@ -66,7 +66,7 @@ function lfgChannels() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const lfg = guild.channels.findAll( ch => ch.name.endsWith(LFG_SUFFIX))
+    const lfg = guild.channels.filterArray( ch => ch.name.endsWith(LFG_SUFFIX))
 
     return lfg
 }
@@ -121,9 +121,11 @@ async function messageHandler(msg) {
             }, { insertMissing: true })
 
             // check if the group exists first
+            const group = await Group.query().findById(msg.channel.id)
+
             const token = await Token.query().insert({
                 user_id: user.id,
-                group_id: null
+                group_id: group ? group.id : null
             })
 
             await msg.author.send('Please click on the following link to use the team tool: ' + 

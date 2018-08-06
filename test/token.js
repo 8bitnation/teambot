@@ -36,4 +36,29 @@ describe('token', function() {
         expect(msg.author.send.calledWith(sinon.match(process.env.HOST_URL+'/auth/'))).to.be.true
     })
 
+    it('should match the correct group', async function() {
+
+        process.env.HOST_URL = 'http://127.0.0.1:1234'
+        const msg = {
+            content: '!team',
+            id: '1234',
+            delete: sinon.stub(),
+            author: { id: '4567', send: sinon.stub(), username: 'testuser' },
+            member: { nickname: 'testusernick' },
+            channel: { id: '3456', name: 'destiny_lfg' }
+        }
+
+        await db.Group.query().insert( { id: '3456', name: 'destiny' })
+        await messageHandler(msg)
+
+        expect(msg.delete.called).to.be.true
+        expect(msg.author.send.called).to.be.true
+        expect(msg.author.send.calledWith(sinon.match(process.env.HOST_URL+'/auth/'))).to.be.true
+        // find the token
+        const token = await db.Token.query().first().where({ user_id: '4567' })
+        expect(token).to.exist
+        expect(token.group_id).to.equal('3456')
+    })
+
+
 })

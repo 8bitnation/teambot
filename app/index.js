@@ -15,7 +15,6 @@ process.on('unhandledRejection', (reason) => {
 })
 
 async function startHttpServer() {
-    logger.info('Starting HTTP service')
     if(!process.env.HOST_URL) throw new Error('process.env.HOST_URL is not set')
 
     const app = new Koa()
