@@ -56,17 +56,51 @@ describe('events', function() {
 
     })
 
+    it.skip('should send a create message', async function() {
+        // create the event
+        // check that we sent a create message
+    })
+
+    it.skip('should send a join message', async function() {
+        // create the event
+        // join another user
+        // check that we sent a join message
+    })
+
+    it.skip('should send a leave message', async function() {
+        // create the event
+        // join another user
+        // leave other user
+        // check that we sent a leave message
+    })
+
+    it.skip('should send a delete message', async function() {
+        // create the event
+        // then leave it
+
+        // check that we did not send a leave message
+        // check that we sent a delete message
+    })
+
+    it.skip('should promote the next user when the owner leaves', async function() {
+        // create the event
+        // join another user
+        // owner leaves
+        // check that we did not send a leave message
+        // check that we sent a promote message
+    })
+
     it('should broadcast an update after an event is created', async function() {
 
         await db.createUser({ id: 'u1', name: 'user1' })
         const t1 = await db.createToken({ user_id: 'u1' })
         const s1 = new SocketHelper()
-        await s1.connect(process.env.HOST_URL + '/events?token=' + t1.id)
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
         
         await db.createUser({ id: 'u2', name: 'user2' })
         const t2 = await db.createToken({ user_id: 'u2' })
         const s2 = new SocketHelper()
-        await s2.connect(process.env.HOST_URL + '/events?token=' + t2.id)
+        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
 
         await db.createUser({ id: 'u3', name: 'user3' })
         const t3 = await db.createToken({ user_id: 'u3' })
@@ -83,5 +117,18 @@ describe('events', function() {
         expect(res).to.exist
 
     })
+
+    it.skip('should broadcast an update after an event is joined', async function() {
+        
+    })
+
+    it.skip('should broadcast an update after an event is left', async function() {
+
+    })
+
+    it.skip('should broadcast an update after an event is deleted', async function() {
+
+    })
+   
 
 })
