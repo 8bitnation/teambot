@@ -16,6 +16,42 @@ async function syncChannels() {
     
 }
 
+function lfgChannels() {
+    const guild = client.guilds.get(process.env.DISCORD_GUILD)
+    if(!guild) return []
+
+    const lfg = guild.channels.findAll( ch => ch.name.endsWith('_lfg'))
+
+    return lfg
+
+}
+
+/**
+ * Get a list of platforms the user is enrolled to
+ * @param {*} user_id 
+ */
+function platforms(user_id) {
+    // should probably get these from the DB
+    return [
+        { id: 1, name: 'Playstation', code: 'PS' },
+        { id: 2, name: 'Xbox', code: 'XB' },
+        { id: 3, name: 'PC', code: 'PC' },
+        { id: 4, name: 'Nintendo', code: 'N' }
+    ]
+}
+
+/**
+ * 
+ */
+async function games(user_id) {
+    const guild = client.guilds.get(process.env.DISCORD_GUILD)
+    if(!guild) return []
+
+    const member = await guild.fetchMember(user_id)
+
+
+}
+
 /**
  * we have to be able to test this async, so we explicitly define and export it
  */
@@ -83,4 +119,4 @@ function login(token) {
     return p
 }
 
-module.exports = { login, messageHandler, syncChannels }
+module.exports = { login, messageHandler, syncChannels, platforms, games, lfgChannels }

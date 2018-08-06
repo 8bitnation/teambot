@@ -28,7 +28,7 @@ describe('events', function() {
 
     })
 
-    it('should recieve the token after connect', async function() {
+    it('should receive the token after connect', async function() {
 
         // create the token
         const t = await db.createToken()
@@ -39,7 +39,7 @@ describe('events', function() {
     })
 
 
-    it('should recieve an update after connect', async function() {
+    it('should receive an update after connect', async function() {
 
         // create the token
         const t = await db.createToken()
