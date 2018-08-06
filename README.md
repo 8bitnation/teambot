@@ -7,6 +7,10 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 # Installation
 
 1. install node.js v8.11.0+
+
+    $ wget https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.xz
+    $ sudo tar -C /usr/local --strip-components 1 -xf node-v8.11.1-linux-x64.tar.xz 
+
 2. git clone https://github.com/8bitnation/discord-danklebot.git
 3. npm install
 4. setup envionment
@@ -20,7 +24,7 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 - Get the client id and follow: https://discordapp.com/oauth2/authorize?scope=bot&client_id=CLIENT_ID
 - Get your token from the bot account page
 
-# Rola and Channel setup
+# Roles and Channel setup
 
 The bot expects the guild/server to have channels in the following format:
 
