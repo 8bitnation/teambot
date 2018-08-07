@@ -25,6 +25,11 @@ describe('events', function() {
     beforeEach(async function() {
         await db.init()
         await http.start()
+        // stub all the discord messages
+        sandbox.stub(discord, 'sendCreateMessage')
+        sandbox.stub(discord, 'sendJoinMessage')
+        sandbox.stub(discord, 'sendLeaveMessage')
+        sandbox.stub(discord, 'sendDeleteMessage')
     })
 
     afterEach(function() {
@@ -68,7 +73,6 @@ describe('events', function() {
 
     it('should send a create message', async function() {
 
-        sandbox.stub(discord, 'sendCreateMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -83,7 +87,6 @@ describe('events', function() {
 
     it('should send a join message', async function() {
 
-        sandbox.stub(discord, 'sendJoinMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -101,7 +104,6 @@ describe('events', function() {
 
     it('should join as a participant', async function() {
 
-        sandbox.stub(discord, 'sendJoinMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -122,7 +124,6 @@ describe('events', function() {
 
     it('should join as an alternative', async function() {
 
-        sandbox.stub(discord, 'sendJoinMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -142,7 +143,6 @@ describe('events', function() {
 
     it('should join as an alternative when the squad is full', async function() {
 
-        sandbox.stub(discord, 'sendJoinMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -164,19 +164,27 @@ describe('events', function() {
 
     })
 
-    it.skip('should send a leave message', async function() {
-        // create user 1
+    it('should send a leave message', async function() {
+
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
         // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
         // join user2
-        // leave user2
+        await s2.join({ event_id: 1, type: 'participant'})
+        // now we leave
+        await s2.leave({ event_id: 1, type: 'participant' })
         // check that we sent a leave message
+        expect(discord.sendLeaveMessage.callCount).to.equal(1)
+
     })
 
     it('should send a delete message', async function() {
 
-        sandbox.stub(discord, 'sendDeleteMessage')
-        sandbox.stub(discord, 'sendLeaveMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -192,8 +200,6 @@ describe('events', function() {
 
     it('should ignore an invalid leave', async function() {
 
-        sandbox.stub(discord, 'sendDeleteMessage')
-        sandbox.stub(discord, 'sendLeaveMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
@@ -207,21 +213,32 @@ describe('events', function() {
         expect(discord.sendDeleteMessage.callCount).to.equal(0)
     })
 
-    it.skip('should promote the next user when the owner leaves', async function() {
+    it('should promote the next user when the owner leaves', async function() {
 
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
         // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
         // join user2
-        // leave user1
-        // check that we did not send a leave message
-        // check that we sent a promote message
-        // check that user2 is owner
+        await s2.join({ event_id: 1, type: 'participant'})
+        // now user1 (owner) leaves
+        await s1.leave({ event_id: 1, type: 'participant' })
+        // check that we sent a leave message
+        expect(discord.sendLeaveMessage.callCount).to.equal(1)
+        // check that user2 is now owner
+        const join = await db.Event.query().eager('[participants]').findById(1)
+        expect(join.participants).to.have.length(1)
+        expect(join.participants[0].id).to.equal('u2')
+
+
     })
 
     it('should broadcast an update after an event is created', async function() {
 
-        sandbox.stub(discord, 'sendCreateMessage')
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
 
@@ -238,16 +255,60 @@ describe('events', function() {
 
     })
 
-    it.skip('should broadcast an update after an event is joined', async function() {
+    it('should broadcast an update after an event is joined', async function() {
 
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
+        const s3 = await createUserAndSocket({ id: 'u3', name: 'user3' })
+
+        // create the event and await the update
+        const res = await Promise.all([
+            s1.events(), s2.events(), await s3.join({ event_id: 1, type: 'participant'})
+        ])
+
+        expect(res).to.exist
     })
 
-    it.skip('should broadcast an update after an event is left', async function() {
+    it('should broadcast an update after an event is left', async function() {
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
 
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
+        await s2.join({ event_id: 1, type: 'participant'})
+        const s3 = await createUserAndSocket({ id: 'u3', name: 'user3' })
+
+        // create the event and await the update
+        const res = await Promise.all([
+            s1.events(), s3.events(), await s2.leave({ event_id: 1, type: 'participant'})
+        ])
+
+        expect(res).to.exist
     })
 
-    it.skip('should broadcast an update after an event is deleted', async function() {
+    it('should broadcast an update after an event is deleted', async function() {
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
 
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
+        const s3 = await createUserAndSocket({ id: 'u3', name: 'user3' })
+
+        // create the event and await the update
+        const res = await Promise.all([
+            s2.events(), s3.events(), await s1.leave({ event_id: 1, type: 'participant'})
+        ])
+
+        expect(res).to.exist
     })
    
 
