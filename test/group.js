@@ -29,7 +29,7 @@ describe('group', function() {
             { id: '1', name: 'Destiny' }
         ])
 
-        await discord.syncChannels()
+        await discord.syncRoles()
 
         const group = await db.Group.query().findById('1')
         expect(group).to.exist
@@ -48,7 +48,7 @@ describe('group', function() {
             { id: '2', name: 'No Mans Sky' }
         ])
 
-        await discord.syncChannels()
+        await discord.syncRoles()
 
         const group1 = await db.Group.query().findById('1')
         expect(group1).to.exist
@@ -71,7 +71,7 @@ describe('group', function() {
             { id: '1', name: 'Destiny' }
         ])
 
-        await discord.syncChannels()
+        await discord.syncRoles()
 
         const group1 = await db.Group.query().findById('1')
         expect(group1).to.exist

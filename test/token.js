@@ -48,7 +48,7 @@ describe('token', function() {
             channel: { id: '3456', name: 'destiny_lfg' }
         }
 
-        await db.Group.query().insert( { id: '3456', name: 'destiny' })
+        await db.createGroup( { id: '3456', name: 'destiny' })
         await messageHandler(msg)
 
         expect(msg.delete.called).to.be.true
@@ -58,6 +58,10 @@ describe('token', function() {
         const token = await db.Token.query().first().where({ user_id: '4567' })
         expect(token).to.exist
         expect(token.group_id).to.equal('3456')
+    })
+
+    it('should add a user to the correct group', async function() {
+        
     })
 
 

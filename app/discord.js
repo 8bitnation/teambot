@@ -5,17 +5,14 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const { format } = require('util')
 
-const Token = require('./db/token')
-const User = require('./db/user')
-const Group = require('./db/group')
-const Event = require('./db/event')
+const { Token, User, Group, Event, Platform } = require('./db')
 
 const LFG_SUFFIX = '_lfg'
 
 /**
  * look for every _lfg channel and add it to the possible target list
  */
-async function syncChannels() {
+async function syncRoles() {
 
     // we want to be able to stub these functions
     // so we need to reference them via the module.exports
@@ -39,11 +36,28 @@ async function syncChannels() {
             if(!group) {
                 logger.info('creating group %s', name)
                 // eslint-disable-next-line no-await-in-loop
-                await Group.query().insert({ id: l.id, name })
+                await Group.query().insert({ id: l.id, role_id: role.id, name })
+            } else {
+                // eslint-disable-next-line no-await-in-loop
+                await Group.query().patch({ role_id: role.id }).where('id', group.id)
             }
 
         }
     } 
+
+    // loop through all the platforms
+
+    const platforms = await Platform.query().select()
+    for(let p of platforms) {
+        // do we have a role with the same name?
+        const role = roles.find( r => r.name.toLowerCase() === p.name.toLowerCase())
+        if(role) {
+            // update the platform role_id
+            logger.debug('synchronising platform %s', p.name)
+            // eslint-disable-next-line no-await-in-loop
+            await Platform.query().patch({ role_id: role.id }).where('id', p.id)
+        }
+    }
 
 }
 
@@ -71,23 +85,17 @@ function lfgChannels() {
 }
 
 /**
- * Get a list of platforms the user is enrolled to
+ * Get a list of roles for the user 
  * @param {*} user_id 
  */
-function platforms() {
-
-}
-
-/**
- * 
- */
-function games() {
+async function userRoles(user_id) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    //const member = await guild.fetchMember(user_id)
+    const member = await guild.fetchMember(user_id)
 
-
+    if(!member) return []
+    return member.roles.array()
 }
 
 async function updateEventMessage(trx, event, message) {
@@ -200,7 +208,7 @@ function login(token) {
 
 module.exports = { 
     login, messageHandler,
-    guildRoles, syncChannels, platforms, games, lfgChannels,
+    guildRoles, syncRoles, userRoles, lfgChannels,
     sendCreateMessage, sendJoinMessage,
     sendLeaveMessage, sendDeleteMessage
 }

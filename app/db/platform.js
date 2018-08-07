@@ -2,9 +2,9 @@
 
 const { Model } = require('objection')
 
-class Group extends Model {
+class Platform extends Model {
     static get tableName() {
-        return 'group'
+        return 'platform'
     }
 
     async $beforeUpdate(context) {
@@ -13,4 +13,4 @@ class Group extends Model {
     }
 }
 
-module.exports = Group
+module.exports = Platform

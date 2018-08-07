@@ -2,6 +2,7 @@
 exports.up = async function(knex) {
     await knex.schema.createTable('platform', function (t) {
         t.string('id').primary().notNullable()
+        t.string('role_id')
         t.timestamp('created_at').defaultTo(new Date().toISOString())
         t.timestamp('updated_at').defaultTo(new Date().toISOString())
         t.string('name').notNullable()
@@ -10,7 +11,7 @@ exports.up = async function(knex) {
     return knex('platform').insert([
         { id: 'PC', name: 'PC' },
         { id: 'PS', name: 'Playstation' },
-        { id: 'XB', name: 'XBox' },
+        { id: 'XB', name: 'Xbox' },
         { id: 'N', name: 'Nintendo' }
     ])
 }

@@ -36,6 +36,7 @@ async function createToken(opts) {
 function createGroup(opts) {
     const group = Object.assign({
         id: 'test-group-1',
+        role_id: '1',
         name: 'test-group'
     }, opts)
 

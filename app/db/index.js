@@ -20,4 +20,5 @@ module.exports.Token = require('./token')
 module.exports.User = require('./user')
 module.exports.Group = require('./group')
 module.exports.Event = require('./event')
+module.exports.Platform = require('./platform')
 module.exports.transaction = transaction
