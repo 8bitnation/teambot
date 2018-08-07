@@ -12,11 +12,13 @@ require('./support/logger')
 const { HTTP_OK } = require('../app/util/const')
 describe('events', function() {
 
+    // helper function
     async function createUserAndSocket(id) {
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        await db.createUser({ id: 'u'+id, name: 'user' + id })
+        const token = await db.createToken({ user_id: 'u' + id })
+        const socket = new SocketHelper()
+        await socket.connectAndEvents(process.env.HOST_URL + '/events?token=' + token.id)
+        return socket
     }
 
     const sandbox = sinon.createSandbox()
@@ -70,10 +72,7 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        const s1 = await createUserAndSocket(1)
         // create the event
         await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // check that we sent a create message
@@ -88,17 +87,11 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        const s1 = await createUserAndSocket(1)
         // create the event
         await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
-        await db.createUser({ id: 'u2', name: 'user2' })
-        const t2 = await db.createToken({ user_id: 'u2' })
-        const s2 = new SocketHelper()
-        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        const s2 = await createUserAndSocket(2)
         // join user2
         await s2.join({ event_id: 1, type: 'participant'})
         // check that we sent a join message
@@ -112,17 +105,11 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        const s1 = await createUserAndSocket(1)
         // create the event
         await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
-        await db.createUser({ id: 'u2', name: 'user2' })
-        const t2 = await db.createToken({ user_id: 'u2' })
-        const s2 = new SocketHelper()
-        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        const s2 = await createUserAndSocket(2)
         // join user2
         await s2.join({ event_id: 1, type: 'participant'})
         // check that we joined as a participant
@@ -138,17 +125,11 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        const s1 = await createUserAndSocket(1)
         // create the event
         await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
-        await db.createUser({ id: 'u2', name: 'user2' })
-        const t2 = await db.createToken({ user_id: 'u2' })
-        const s2 = new SocketHelper()
-        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        const s2 = await createUserAndSocket(2)
         // join user2
         await s2.join({ event_id: 1, type: 'alternative'})
         // check that we joined as an alternative
@@ -164,24 +145,15 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        const s1 = await createUserAndSocket(1)
         // create the event
         await s1.create({ id: 1, name: 'test event', group_id: '1', max_participants: 2  })
         // create user2
-        await db.createUser({ id: 'u2', name: 'user2' })
-        const t2 = await db.createToken({ user_id: 'u2' })
-        const s2 = new SocketHelper()
-        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        const s2 = await createUserAndSocket(2)
         // join user2
         await s2.join({ event_id: 1, type: 'participant'})
         // create user3
-        await db.createUser({ id: 'u3', name: 'user3' })
-        const t3 = await db.createToken({ user_id: 'u3' })
-        const s3 = new SocketHelper()
-        await s3.connectAndEvents(process.env.HOST_URL + '/events?token=' + t3.id)
+        const s3 = await createUserAndSocket(3)
         // join user2
         await s3.join({ event_id: 1, type: 'participant'})
         // check that we joined as an alternative
@@ -228,20 +200,9 @@ describe('events', function() {
         // create group
         await db.createGroup({ id: '1', name: 'destiny'})
 
-        await db.createUser({ id: 'u1', name: 'user1' })
-        const t1 = await db.createToken({ user_id: 'u1' })
-        const s1 = new SocketHelper()
-        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
-        
-        await db.createUser({ id: 'u2', name: 'user2' })
-        const t2 = await db.createToken({ user_id: 'u2' })
-        const s2 = new SocketHelper()
-        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
-
-        await db.createUser({ id: 'u3', name: 'user3' })
-        const t3 = await db.createToken({ user_id: 'u3' })
-        const s3 = new SocketHelper()
-        await s3.connectAndEvents(process.env.HOST_URL + '/events?token=' + t3.id)
+        const s1 = await createUserAndSocket(1)
+        const s2 = await createUserAndSocket(2)
+        const s3 = await createUserAndSocket(3)
 
         // create the event and await the update
         const res = await Promise.all([
