@@ -98,7 +98,9 @@ describe('token', function() {
             author: { 
                 id: '4567', 
                 send: sinon.stub(), 
-                fetchMessage: sinon.stub().returns(dm),
+                dmChannel: {
+                    fetchMessage: sinon.stub().returns(dm)
+                },
                 username: 'testuser' 
             },
             member: { nickname: 'testusernick' },
@@ -107,7 +109,7 @@ describe('token', function() {
         await messageHandler(msg)
 
         const NUM_MESSAGES = 2
-        expect(msg.author.fetchMessage.callCount).to.equal(NUM_MESSAGES)
+        expect(msg.author.dmChannel.fetchMessage.callCount).to.equal(NUM_MESSAGES)
         expect(dm.delete.callCount).to.equal(NUM_MESSAGES)
 
     })

@@ -192,7 +192,7 @@ async function messageHandler(msg) {
             try {
                 if(t.message_id) {
                     // eslint-disable-next-line no-await-in-loop
-                    const old_message = await msg.author.fetchMessage(t.message_id)
+                    const old_message = await msg.author.dmChannel.fetchMessage(t.message_id)
                     // eslint-disable-next-line no-await-in-loop
                     if(old_message) await old_message.delete()
                 }
@@ -220,12 +220,12 @@ async function messageHandler(msg) {
                 group_id: group ? group.id : null
             })
 
-            const message_id = await msg.author.send('Please click on the following link to use the team tool: ' + 
+            const message = await msg.author.send('Please click on the following link to use the team tool: ' + 
                 process.env.HOST_URL + '/auth/' + token.id )
 
             // save the message_id we sent with the token URL
-            if(message_id) {
-                await token.$query().patch({ message_id })
+            if(message && message.id) {
+                await token.$query().patch({ message_id: message.id })
             }
         } catch(err) {
             logger.error('something went wrong when dealing with message: %s, %s %j', msg.id, err.message, err.stack)
