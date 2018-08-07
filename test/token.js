@@ -60,9 +60,59 @@ describe('token', function() {
         expect(token.group_id).to.equal('3456')
     })
 
-    it('should add a user to the correct group', async function() {
-        
+    it('should remove any previous tokens', async function() {
+
+        const user = await db.createUser()
+        await db.createToken({ id: 't1', user_id: user.id })
+        await db.createToken({ id: 't2', user_id: user.id })
+
+        process.env.HOST_URL = 'http://127.0.0.1:1234'
+        const msg = {
+            content: '!team',
+            id: '1234',
+            delete: sinon.stub(),
+            author: { id: user.id, send: sinon.stub(), username: 'testuser' },
+            member: { nickname: 'testusernick' },
+            channel: { id: '3456', name: 'destiny_lfg' }
+        }
+        await messageHandler(msg)
+
+        const tokens = await db.Token.query().where({ user_id: user.id })
+        expect(tokens.length).to.equal(1)
+
     })
+
+    it('should remove any previous messages', async function() {
+
+        const user = await db.createUser( { id: '4567'})
+        await db.createToken({ id: 't1', message_id: '1', user_id: user.id })
+        await db.createToken({ id: 't2', message_id: '2', user_id: user.id })
+
+        const dm = { delete: sinon.stub() }
+
+        process.env.HOST_URL = 'http://127.0.0.1:1234'
+        const msg = {
+            content: '!team',
+            id: '1234',
+            delete: sinon.stub(),
+            author: { 
+                id: '4567', 
+                send: sinon.stub(), 
+                fetchMessage: sinon.stub().returns(dm),
+                username: 'testuser' 
+            },
+            member: { nickname: 'testusernick' },
+            channel: { id: '3456', name: 'destiny_lfg' }
+        }
+        await messageHandler(msg)
+
+        const NUM_MESSAGES = 2
+        expect(msg.author.fetchMessage.callCount).to.equal(NUM_MESSAGES)
+        expect(dm.delete.callCount).to.equal(NUM_MESSAGES)
+
+    })
+
+
 
 
 })

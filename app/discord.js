@@ -39,7 +39,7 @@ async function syncRoles() {
                 await Group.query().insert({ id: l.id, role_id: role.id, name })
             } else {
                 // eslint-disable-next-line no-await-in-loop
-                await Group.query().patch({ role_id: role.id }).where('id', group.id)
+                await group.$query().patch({ role_id: role.id })
             }
 
         }
@@ -55,7 +55,7 @@ async function syncRoles() {
             // update the platform role_id
             logger.debug('synchronising platform %s', p.name)
             // eslint-disable-next-line no-await-in-loop
-            await Platform.query().patch({ role_id: role.id }).where('id', p.id)
+            await p.$query().patch({ role_id: role.id })
         }
     }
 
@@ -185,8 +185,24 @@ async function messageHandler(msg) {
         // ignore anything not from a guild
         if(!msg.member || !msg.channel) return
 
-        try {
+        // try and remove any previous tokens and messages
+        const tokens = await Token.query().where('user_id', msg.author.id)
+        await Token.query().del().where('user_id', msg.author.id)
+        for(let t of tokens) {
+            try {
+                if(t.message_id) {
+                    // eslint-disable-next-line no-await-in-loop
+                    const old_message = await msg.author.fetchMessage(t.message_id)
+                    // eslint-disable-next-line no-await-in-loop
+                    if(old_message) await old_message.delete()
+                }
+            } catch(err) {
+                logger.error('something went wrong when removing old token messages for user %s, %s %j', msg.author.username, err.message, err.stack)
+            }
+        }
 
+        // create everything from new
+        try {
             // create the user
             const user = await User.query().upsertGraph({
                 id: msg.author.id,
@@ -204,8 +220,13 @@ async function messageHandler(msg) {
                 group_id: group ? group.id : null
             })
 
-            await msg.author.send('Please click on the following link to use the team tool: ' + 
+            const message_id = await msg.author.send('Please click on the following link to use the team tool: ' + 
                 process.env.HOST_URL + '/auth/' + token.id )
+
+            // save the message_id we sent with the token URL
+            if(message_id) {
+                await token.$query().patch({ message_id })
+            }
         } catch(err) {
             logger.error('something went wrong when dealing with message: %s, %s %j', msg.id, err.message, err.stack)
         }   
