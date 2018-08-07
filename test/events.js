@@ -12,6 +12,13 @@ require('./support/logger')
 const { HTTP_OK } = require('../app/util/const')
 describe('events', function() {
 
+    async function createUserAndSocket(id) {
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+    }
+
     const sandbox = sinon.createSandbox()
     beforeEach(async function() {
         await db.init()
@@ -57,7 +64,7 @@ describe('events', function() {
 
     })
 
-    it.only('should send a create message', async function() {
+    it('should send a create message', async function() {
 
         sandbox.stub(discord, 'sendCreateMessage')
         // create group
@@ -68,20 +75,120 @@ describe('events', function() {
         const s1 = new SocketHelper()
         await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
         // create the event
-        await s1.create({ id: 1, name: 'test event', platform_id: 'PC', group_id: '1' })
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // check that we sent a create message
 
         expect(discord.sendCreateMessage.callCount).to.equal(1)
 
     })
 
-    it.skip('should send a join message', async function() {
+    it('should send a join message', async function() {
 
+        sandbox.stub(discord, 'sendJoinMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
         // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
         // create user2
+        await db.createUser({ id: 'u2', name: 'user2' })
+        const t2 = await db.createToken({ user_id: 'u2' })
+        const s2 = new SocketHelper()
+        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
         // join user2
+        await s2.join({ event_id: 1, type: 'participant'})
         // check that we sent a join message
+        expect(discord.sendJoinMessage.callCount).to.equal(1)
+
+    })
+
+    it('should join as a participant', async function() {
+
+        sandbox.stub(discord, 'sendJoinMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+        // create user2
+        await db.createUser({ id: 'u2', name: 'user2' })
+        const t2 = await db.createToken({ user_id: 'u2' })
+        const s2 = new SocketHelper()
+        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        // join user2
+        await s2.join({ event_id: 1, type: 'participant'})
+        // check that we joined as a participant
+        const join = await db.Event.query().eager('[participants]').findById(1)
+        expect(join.participants).to.have.length(2)
+        expect(join.participants[1].id).to.equal('u2')
+
+    })
+
+    it('should join as an alternative', async function() {
+
+        sandbox.stub(discord, 'sendJoinMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+        // create user2
+        await db.createUser({ id: 'u2', name: 'user2' })
+        const t2 = await db.createToken({ user_id: 'u2' })
+        const s2 = new SocketHelper()
+        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        // join user2
+        await s2.join({ event_id: 1, type: 'alternative'})
+        // check that we joined as an alternative
+        const join = await db.Event.query().eager('[alternatives]').findById(1)
+        expect(join.alternatives).to.have.length(1)
+        expect(join.alternatives[0].id).to.equal('u2')
+
+    })
+
+    it('should join as an alternative when the squad is full', async function() {
+
+        sandbox.stub(discord, 'sendJoinMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        await db.createUser({ id: 'u1', name: 'user1' })
+        const t1 = await db.createToken({ user_id: 'u1' })
+        const s1 = new SocketHelper()
+        await s1.connectAndEvents(process.env.HOST_URL + '/events?token=' + t1.id)
+        // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1', max_participants: 2  })
+        // create user2
+        await db.createUser({ id: 'u2', name: 'user2' })
+        const t2 = await db.createToken({ user_id: 'u2' })
+        const s2 = new SocketHelper()
+        await s2.connectAndEvents(process.env.HOST_URL + '/events?token=' + t2.id)
+        // join user2
+        await s2.join({ event_id: 1, type: 'participant'})
+        // create user3
+        await db.createUser({ id: 'u3', name: 'user3' })
+        const t3 = await db.createToken({ user_id: 'u3' })
+        const s3 = new SocketHelper()
+        await s3.connectAndEvents(process.env.HOST_URL + '/events?token=' + t3.id)
+        // join user2
+        await s3.join({ event_id: 1, type: 'participant'})
+        // check that we joined as an alternative
+        const join = await db.Event.query().eager('[alternatives]').findById(1)
+        expect(join.alternatives).to.have.length(1)
+        expect(join.alternatives[0].id).to.equal('u3')
+
     })
 
     it.skip('should send a leave message', async function() {
@@ -138,7 +245,7 @@ describe('events', function() {
 
         // create the event and await the update
         const res = await Promise.all([
-            s2.events(), s3.events(), s1.create({ id: 1, name: 'test event', platform_id: 'PC', group_id: '1' })
+            s2.events(), s3.events(), await s1.create({ id: 1, name: 'test event', group_id: '1' })
         ])
 
         expect(res).to.exist

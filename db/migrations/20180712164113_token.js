@@ -2,7 +2,7 @@
 exports.up = function(knex) {
     return knex.schema.createTable('token', function (t) {
         t.string('id').primary().notNullable()
-        t.timestamps(true, true)
+        t.timestamp('created_at').defaultTo(new Date().toISOString())
         t.string('user_id').notNullable()
         t.string('group_id').nullable()
         t.foreign('user_id').references('id').inTable('user')

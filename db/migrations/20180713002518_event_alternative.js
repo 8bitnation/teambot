@@ -1,7 +1,8 @@
 'use strict'
 exports.up = function(knex) {
-    return knex.schema.createTable('event_user', function (t) {
-        t.timestamps(true, true)
+    return knex.schema.createTable('event_alternative', function (t) {
+        t.increments().primary()
+        t.timestamp('created_at').defaultTo(new Date().toISOString())
         t.string('user_id').notNullable()
         t.string('event_id').notNullable()
         t.foreign('user_id').references('id').inTable('user')
@@ -11,5 +12,5 @@ exports.up = function(knex) {
 }
 
 exports.down = function(knex) {
-    return knex.schema.dropTable('event_user')
+    return knex.schema.dropTable('event_alternative')
 }

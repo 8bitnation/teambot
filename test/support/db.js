@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 
 const db = require('../../app/db')
-const { Group, Token } = db
+const { Group, Token, Event } = db
 const config = Object.assign({}, require('../../app/db/config'))
 config.connection.filename = 'db/test.sqlite'
 
@@ -52,5 +52,5 @@ function createUser(opts) {
     return db.User.query().insert(user)
 }
 
-module.exports = { init, createGroup, createToken, createUser, Group, Token }
+module.exports = { init, createGroup, createToken, createUser, Group, Token, Event }
 

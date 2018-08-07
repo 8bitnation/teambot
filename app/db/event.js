@@ -28,18 +28,35 @@ class Event extends Model {
                     to: 'group.id'
                 }
             },
-            users: {
+            participants: {
                 relation: Model.ManyToManyRelation,
                 modelClass: User,
                 join: {
 
                     from: 'event.id',
                     through: {
-                        from: 'event_user.event_id',
-                        to: 'event_user.user_id'
+                        from: 'event_participant.event_id',
+                        to: 'event_participant.user_id',
+                        extra: { participant_id: 'id', joined_at: 'created_at'}
                     },
                     to: 'user.id'
-                }
+                },
+                filter: qb => qb.orderBy('event_participant.id')
+            },
+            alternatives: {
+                relation: Model.ManyToManyRelation,
+                modelClass: User,
+                join: {
+
+                    from: 'event.id',
+                    through: {
+                        from: 'event_alternative.event_id',
+                        to: 'event_alternative.user_id',
+                        extra: { alternate_id: 'id', joined_at: 'created_at'}
+                    },
+                    to: 'user.id'
+                },
+                filter: qb => qb.orderBy('event_alternative.id')
             }
         }
     }

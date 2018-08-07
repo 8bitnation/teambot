@@ -17,8 +17,6 @@ const LFG_SUFFIX = '_lfg'
  */
 async function syncChannels() {
 
-    const SUFFIX = '_lfg'
-
     // we want to be able to stub these functions
     // so we need to reference them via the module.exports
     const lfg = module.exports.lfgChannels()
@@ -27,7 +25,7 @@ async function syncChannels() {
     // loop through each channel and see if there is a corresponding role
 
     for (let l of lfg) {
-        const name = l.name.slice(0, -SUFFIX.length).replace(/_/g, ' ').toLowerCase()
+        const name = l.name.slice(0, -LFG_SUFFIX.length).replace(/_/g, ' ').toLowerCase()
         // do we have a role?
         const role = roles.find( r => r.name.replace(/_/g, ' ').toLowerCase() === name )
         if(role) {
@@ -117,10 +115,16 @@ async function updateEventMessage(trx, event, message) {
 }
 
 
-async function sendCreateMessage(trx, event) {
+function sendCreateMessage(trx, event) {
     // build a message
 
-    await updateEventMessage(trx, event, 'created event')
+    return updateEventMessage(trx, event, 'created event')
+}
+
+function sendJoinMessage(trx, event) {
+    // build a message
+
+    return updateEventMessage(trx, event, 'created event')
 }
 
 /**
@@ -193,5 +197,5 @@ function login(token) {
 module.exports = { 
     login, messageHandler,
     guildRoles, syncChannels, platforms, games, lfgChannels,
-    sendCreateMessage
+    sendCreateMessage, sendJoinMessage
 }
