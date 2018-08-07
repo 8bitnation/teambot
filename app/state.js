@@ -3,7 +3,7 @@
 const { Event, transaction } = require('./db')
 const discord = require('./discord')
 
-async function events(token) {
+function events() {
     // get a list of events that are visible for the roken
 
     // first we get the roles the user has

@@ -8,14 +8,15 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 
 1. install node.js v8.11.0+
 
-    $ wget https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.xz
-    $ sudo tar -C /usr/local --strip-components 1 -xf node-v8.11.1-linux-x64.tar.xz 
+        $ wget https://nodejs.org/dist/v8.11.1/node-v8.11.1-linux-x64.tar.xz
+        $ sudo tar -C /usr/local --strip-components 1 -xf node-v8.11.1-linux-x64.tar.xz 
 
 2. git clone https://github.com/8bitnation/discord-danklebot.git
 3. npm install
 4. setup envionment
-    - HOST_URL = https://db9c92d4.ngrok.io
-    - DISCORD_TOKEN = <BOT/BUILD-AT-BOT/TOKEN>
+
+        HOST_URL = https://db9c92d4.ngrok.io
+        DISCORD_TOKEN = <BOT/BUILD-AT-BOT/TOKEN>
 
 # discord
 

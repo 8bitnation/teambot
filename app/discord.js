@@ -74,24 +74,18 @@ function lfgChannels() {
  * Get a list of platforms the user is enrolled to
  * @param {*} user_id 
  */
-function platforms(user_id) {
-    // should probably get these from the DB
-    return [
-        { id: 1, name: 'Playstation', code: 'PS' },
-        { id: 2, name: 'Xbox', code: 'XB' },
-        { id: 3, name: 'PC', code: 'PC' },
-        { id: 4, name: 'Nintendo', code: 'N' }
-    ]
+function platforms() {
+
 }
 
 /**
  * 
  */
-async function games(user_id) {
+function games() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const member = await guild.fetchMember(user_id)
+    //const member = await guild.fetchMember(user_id)
 
 
 }

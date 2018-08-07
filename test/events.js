@@ -114,7 +114,8 @@ describe('events', function() {
         await s2.join({ event_id: 1, type: 'participant'})
         // check that we joined as a participant
         const join = await db.Event.query().eager('[participants]').findById(1)
-        expect(join.participants).to.have.length(2)
+        const NUM_PARTICIPANTS = 2
+        expect(join.participants).to.have.length(NUM_PARTICIPANTS)
         expect(join.participants[1].id).to.equal('u2')
 
     })
