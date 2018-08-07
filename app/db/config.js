@@ -4,7 +4,7 @@ module.exports = {
     client: 'sqlite3',
     useNullAsDefault: true,
     connection: {
-        filename: 'db/danklebot.sqlite'
+        filename: 'db/teambot.sqlite'
     },
     migrations: {
         directory: 'db/migrations'
