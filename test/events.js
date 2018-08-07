@@ -172,14 +172,38 @@ describe('events', function() {
         // check that we sent a leave message
     })
 
-    it.skip('should send a delete message', async function() {
+    it('should send a delete message', async function() {
 
+        sandbox.stub(discord, 'sendDeleteMessage')
+        sandbox.stub(discord, 'sendLeaveMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
         // create user1
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
         // create the event
-        // leave user1
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+        // check that we sent a create message
+        await s1.leave({ event_id: 1, type: 'participant' })
 
-        // check that we did not send a leave message
-        // check that we sent a delete message
+        expect(discord.sendLeaveMessage.callCount).to.equal(0)
+        expect(discord.sendDeleteMessage.callCount).to.equal(1)
+    })
+
+    it('should ignore an invalid leave', async function() {
+
+        sandbox.stub(discord, 'sendDeleteMessage')
+        sandbox.stub(discord, 'sendLeaveMessage')
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
+        // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
+        // check that we sent a create message
+        await s2.leave({ event_id: 1, type: 'participant' })
+        expect(discord.sendLeaveMessage.callCount).to.equal(0)
+        expect(discord.sendDeleteMessage.callCount).to.equal(0)
     })
 
     it.skip('should promote the next user when the owner leaves', async function() {

@@ -41,6 +41,13 @@ class SocketHelper {
             this.socket.emit('join', join)
         })
     }
+
+    leave(leave) {
+        return new Promise( (resolve) => {
+            this.socket.once('events', resolve)
+            this.socket.emit('leave', leave)
+        })
+    }
 }
 
 module.exports = SocketHelper

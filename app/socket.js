@@ -49,13 +49,13 @@ module.exports = function(server) {
             ee.emit('update')
         })
 
-        socket.on('join', async function(event) {
-            await state.joinEvent(token, event)
+        socket.on('join', async function(join) {
+            await state.joinEvent(token, join)
             ee.emit('update')
         })
 
-        socket.on('leave', async function(event) {
-            await state.leaveEvent(token, event)
+        socket.on('leave', async function(leave) {
+            await state.leaveEvent(token, leave)
             ee.emit('update')
         })
 

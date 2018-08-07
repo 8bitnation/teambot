@@ -124,8 +124,18 @@ function sendCreateMessage(trx, event) {
 function sendJoinMessage(trx, event) {
     // build a message
 
-    return updateEventMessage(trx, event, 'created event')
+    return updateEventMessage(trx, event, 'joined event')
 }
+
+function sendLeaveMessage(trx, event) {
+    return updateEventMessage(trx, event, 'left event')
+}
+
+
+function sendDeleteMessage(trx, event) {
+    return updateEventMessage(trx, event, 'deleted event')
+}
+
 
 /**
  * we have to be able to test this async, so we explicitly define and export it
@@ -197,5 +207,6 @@ function login(token) {
 module.exports = { 
     login, messageHandler,
     guildRoles, syncChannels, platforms, games, lfgChannels,
-    sendCreateMessage, sendJoinMessage
+    sendCreateMessage, sendJoinMessage,
+    sendLeaveMessage, sendDeleteMessage
 }

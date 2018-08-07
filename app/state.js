@@ -48,8 +48,30 @@ async function joinEvent(token, join) {
     }) 
 }
 
-async function leaveEvent() {
+async function leaveEvent(token, leave) {
+    const knex = Event.knex()
+    await transaction(knex, async(trx) => {
 
+        // get the current event
+
+        const event = await Event.query(trx).eager('[participants, alternatives]').findById(leave.event_id)
+
+        // maybe the event was deleted?
+        if(event) {
+            const del = await knex('event_' + leave.type).transacting(trx).del().where( { event_id: event.id, user_id: token.user_id})
+            if(!del) return // nothing was done
+            // to be safe, just go get the event again
+            const update = await Event.query(trx).eager('[participants, alternatives]').findById(leave.event_id)
+            if(update.participants.length) {
+                await discord.sendLeaveMessage(trx, event)
+            } else {
+                // delete the event
+                await Event.query(trx).deleteById(leave.event_id)
+                await discord.sendDeleteMessage(trx, event)
+            }
+            
+        }
+    }) 
 }
 
 module.exports = {
