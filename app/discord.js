@@ -98,6 +98,36 @@ async function userRoles(user_id) {
     return member.roles.array()
 }
 
+/**
+ * Build a list of platform id's ready for a graphUpsert
+ * @param {*} user_id 
+ */
+async function userPlatforms(user_id) {
+    const roles = await module.exports.userRoles(user_id)
+    const platforms = []
+    for(let r of roles) {
+        // eslint-disable-next-line no-await-in-loop
+        const platform = await Platform.query().first().where('role_id', r.id)
+        if(platform) platforms.push({ id: platform.id })
+    }
+    return platforms
+}
+
+/**
+ * Build a list of group id's ready for a graphUpsert
+ * @param {*} user_id 
+ */
+async function userGroups(user_id) {
+    const roles = await module.exports.userRoles(user_id)
+    const groups = []
+    for(let r of roles) {
+        // eslint-disable-next-line no-await-in-loop
+        const group = await Group.query().first().where('role_id', r.id)
+        if(group) groups.push({ id: group.id })
+    }
+    return groups
+}
+
 async function updateEventMessage(trx, event, message) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
@@ -149,22 +179,26 @@ async function messageHandler(msg) {
         try {
             await msg.delete()
         } catch(err) {
-            logger.error('failed to remove message: %s', msg.id)
+            logger.error('failed to remove message: %s, %s %j', msg.id, err.message, err.stack)
         }
 
         // ignore anything not from a guild
         if(!msg.member || !msg.channel) return
 
         try {
-            // create a token
+
+            // create the user
             const user = await User.query().upsertGraph({
                 id: msg.author.id,
-                name: msg.member.nickname || msg.author.username
-            }, { insertMissing: true })
+                name: msg.member.nickname || msg.author.username,
+                groups: await userGroups(msg.author.id),
+                platforms: await userPlatforms(msg.author.id)
+            }, { insertMissing: true, relate: true, unrelate: true })
 
             // check if the group exists first
             const group = await Group.query().findById(msg.channel.id)
 
+            // create the token
             const token = await Token.query().insert({
                 user_id: user.id,
                 group_id: group ? group.id : null
@@ -173,7 +207,7 @@ async function messageHandler(msg) {
             await msg.author.send('Please click on the following link to use the team tool: ' + 
                 process.env.HOST_URL + '/auth/' + token.id )
         } catch(err) {
-            logger.error('something went wrong when dealing with message: %s', msg.id, err)
+            logger.error('something went wrong when dealing with message: %s, %s %j', msg.id, err.message, err.stack)
         }   
 
     } 
