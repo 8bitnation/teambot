@@ -12,16 +12,8 @@ class Event extends Model {
         const Group = require('./group')
 
         return {
-            owner: {
-                relation: Model.HasOneRelation,
-                modelClass: User,
-                join: {
-                    from: 'event.owner_id',
-                    to: 'user.id'
-                }
-            },
             group: {
-                relation: Model.HasOneRelation,
+                relation: Model.BelongsToOneRelation,
                 modelClass: Group,
                 join: {
                     from: 'event.group_id',

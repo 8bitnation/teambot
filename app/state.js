@@ -1,17 +1,26 @@
 'use strict'
 
-const { Event, transaction } = require('./db')
+const { User, Event, transaction } = require('./db')
 const discord = require('./discord')
 
-function events() {
+async function events(token) {
     // get a list of events that are visible for the roken
 
     // first we get the roles the user has
     //const roles = await discord.roles(token.user_id)
 
+    const puser = await User.query().eager('[platforms]').findById(token.user_id)
+    if(!puser) return { error: 'user not found' }
+
+    // make a list of the platform id's
+    const platforms = puser.platforms.map( p => p.id)
+    const guser = await puser.$query().eager('[groups, groups.events, groups.events.[participants, alternatives]]')
+        .modifyEager('groups.events', qb => {
+            qb.whereIn('platform_id', platforms)
+        })
 
     //await Event.query()
-    return {}
+    return guser
 }
 
 async function createEvent(token, e) {
