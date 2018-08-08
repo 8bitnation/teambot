@@ -244,7 +244,9 @@ function login(token) {
             // if no guild is specified, get the first one
             if(!process.env.DISCORD_GUILD) {
                 const g = client.guilds.first()
+                if(!g) throw new Error('Unable to determine guild!')
                 process.env.DISCORD_GUILD = g.id
+                
             }
         
             const guild = client.guilds.get(process.env.DISCORD_GUILD)
