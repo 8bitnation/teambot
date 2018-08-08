@@ -5,7 +5,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const { format } = require('util')
 
-const { Token, User, Group, Event, Platform } = require('./db')
+const { Token, User, Group, Platform } = require('./db')
 
 const LFG_SUFFIX = '_lfg'
 
@@ -136,39 +136,116 @@ async function updateEventMessage(trx, event, message) {
     if(!channel) return logger.error('updateEventMessage: failed to find channel %s', event.channel_id)
 
     if(event.message_id) {
-        const prev_message = await channel.fetchMessage(event.message_id)
-        if(prev_message) await prev_message.delete()
+        try {
+            const prev_message = await channel.fetchMessage(event.message_id)
+        
+            if(prev_message) {
+                await prev_message.delete()
+            }
+        } catch(err) {
+            logger.error('failed to delete old message %s, %j', event.message_id, err.stack)
+        }
+
     }
 
-    const new_message = await channel.send(message)
-
-    const e = Event.query(trx).findById(event.id)
-    if(e && e.message_id === event.message_id) {
-        //update the message id
-        await e.$query(trx).patch({ message_id: new_message.id })
+    try {
+        logger.debug('sending message %j', message)
+        const new_message = await channel.send(message)
+    
+        await event.$query(trx).patch({ message_id: new_message.id })
+    } catch(err) {
+        logger.error('failed to send message %j', err.stack)
     }
+
 }
 
-
-function sendCreateMessage(trx, event) {
+function sendCreateMessage(trx, token, event) {
     // build a message
 
-    return updateEventMessage(trx, event, 'created event')
+    const msg = {
+        embed: {
+            color: 3447003,
+            description: '<@'+token.user_id+'> created event: **' + event.name + '**',
+            timestamp: event.when,
+            footer: { text: event.platform_id + ' | event starts' }
+        }
+    }
+
+    return updateEventMessage(trx, event, msg)
 }
 
-function sendJoinMessage(trx, event) {
+function sendJoinMessage(trx, token, event) {
     // build a message
+    const msg = {
+        embed: {
+            color: 3447003,
+            description: '<@'+token.user_id+'> joined event: **' + event.name + '**',
+            timestamp: event.when,
+            footer: { text: event.platform_id + ' | event starts' },
+            fields: [
+                { 
+                    name: 'Participants [' + 
+                        event.participants.length + '/' + event.max_participants + ']',
+                    value: event.participants.map( p => p.name).join('\n'),
+                    inline: true
+                }
+            ]
+        }
 
-    return updateEventMessage(trx, event, 'joined event')
+    }
+
+    if(event.alternatives.length) {
+
+        msg.embed.fields.push({
+            name: 'Alternatives [+' + event.alternatives.length + ']',
+            value: event.alternatives.map( a => a.name).join('\n'),
+            inline: true
+        })
+
+    }
+    return updateEventMessage(trx, event, msg)
 }
 
-function sendLeaveMessage(trx, event) {
-    return updateEventMessage(trx, event, 'left event')
+function sendLeaveMessage(trx, token, event) {
+    const msg = {
+        embed: {
+            color: 3447003,
+            description: '<@'+token.user_id+'> left event: **' + event.name + '**',
+            timestamp: event.when,
+            footer: { text: event.platform_id + ' | event starts' },
+            fields: [
+                { 
+                    name: 'Participants [' + 
+                        event.participants.length + '/' + event.max_participants + ']',
+                    value: event.participants.map( p => p.name).join('\n'),
+                    inline: true
+                }
+            ]
+        }
+
+    }
+
+    if(event.alternatives.length) {
+
+        msg.embed.fields.push({
+            name: 'Alternatives [+' + event.alternatives.length + ']',
+            value: event.alternatives.map( a => a.name).join('\n'),
+            inline: true
+        })
+
+    }
+    return updateEventMessage(trx, event, msg)
 }
 
 
-function sendDeleteMessage(trx, event) {
-    return updateEventMessage(trx, event, 'deleted event')
+function sendDeleteMessage(trx, token, event) {
+    const msg = {
+        embed: {
+            color: 3447003,
+            description: '<@'+token.user_id+'> deleted event: **' + event.name + '**',
+        }
+    }
+    return updateEventMessage(trx, event, msg)
 }
 
 

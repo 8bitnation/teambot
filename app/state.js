@@ -39,6 +39,7 @@ async function events(token) {
                     id: e.id,
                     platform: e.platform_id,
                     date: eventTime.format('ddd, MMM Do, hh:mm A'),
+                    timestamp: eventTime.valueOf(),
                     tz: eventTime.format('z'),
                     tzWarning,
                     name: e.name,
@@ -47,7 +48,7 @@ async function events(token) {
                     participants: e.participants,
                     alternatives: e.alternatives
                 }
-            })
+            }).sort( (a, b) => a.timestamp - b.timestamp )
         }
     })
 
@@ -110,7 +111,7 @@ async function createEvent(token, e) {
 
         e.participants = [ { id: token.user_id } ]
         const event = await Event.query(trx).insertGraph(e, { relate: true })
-        await discord.sendCreateMessage(trx, event)
+        await discord.sendCreateMessage(trx, token, event)
     })
 
 }
@@ -130,7 +131,8 @@ async function joinEvent(token, join) {
             const isParticipant = (join.type === 'participant' && event.participants.length < event.max_participants )
             const rq = isParticipant ? 'participants' : 'alternatives'
             await event.$relatedQuery(rq, trx).relate({ id: token.user_id })
-            await discord.sendJoinMessage(trx, event)
+            const update = await event.$query(trx).eager('[participants, alternatives]')
+            await discord.sendJoinMessage(trx, token, update)
         }
     }) 
 }
@@ -152,12 +154,12 @@ async function leaveEvent(token, leave) {
             // to be safe, just go get the event again
             const update = await event.$query(trx).eager('[participants, alternatives]')
             if(update.participants.length) {
-                await discord.sendLeaveMessage(trx, event)
+                await discord.sendLeaveMessage(trx, token, update)
             } else {
                 // delete the event
                 logger.debug('deleting event %j %j', token, leave)
                 await Event.query(trx).deleteById(leave.event_id)
-                await discord.sendDeleteMessage(trx, event)
+                await discord.sendDeleteMessage(trx, token, update)
             }
             
         }
