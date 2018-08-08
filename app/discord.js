@@ -132,7 +132,7 @@ async function updateEventMessage(trx, event, message) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
 
-    const channel = guild.channels.get(event.channel_id)
+    const channel = guild.channels.get(event.group_id)
     if(!channel) return logger.error('updateEventMessage: failed to find channel %s', event.channel_id)
 
     if(event.message_id) {
@@ -140,10 +140,13 @@ async function updateEventMessage(trx, event, message) {
         if(prev_message) await prev_message.delete()
     }
 
-    const new_message = await channel.sendMessage(message)
+    const new_message = await channel.send(message)
 
-    await Event.query(trx).update({ message_id: new_message.id }).where({ id: event.id, message_id: event.message_id })
-
+    const e = Event.query(trx).findById(event.id)
+    if(e && e.message_id === event.message_id) {
+        //update the message id
+        await e.$query(trx).patch({ message_id: new_message.id })
+    }
 }
 
 
