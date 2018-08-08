@@ -31,6 +31,7 @@ async function events(token) {
                     when: e.when,
                     name: e.name,
                     max_participants: e.max_participants,
+                    joined: e.participants.concat(e.alternatives).find( p => p.id === token.user_id ),
                     participants: e.participants,
                     alternatives: e.alternatives
                 }

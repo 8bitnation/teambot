@@ -21,6 +21,11 @@ if(window.hasOwnProperty('Vue')) {
     Vue.component('event-item', {
         props: ['event'],
         template: '#event-item-template',
+        computed: {
+            canJoin: function() {
+                return !this.event.joined
+            }
+        },
         methods: {
             toggleVisible: function() {
                 this.event.visible = !this.event.visible
