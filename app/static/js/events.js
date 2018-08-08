@@ -75,20 +75,39 @@ if(window.hasOwnProperty('Vue')) {
         props: ['group'],
         template: '#group-item-template',
         data: function() {
+            // eslint-disable-next-line prefer-destructuring
+            var datePicker = this.$root.datePicker
             return {
                 newEvent: false,
                 event: {
                     name: '',
-                    date: '',
-                    hour: '',
-                    group: '',
-                    max_participants: 4
-                }
+                    date: datePicker.dates[0].value,
+                    hour: datePicker.now.hour,
+                    group_id: this.group.id,
+                    minutes: datePicker.now.minutes,
+                    period: datePicker.now.period,
+                    tz: datePicker.now.tz,
+                    tzWarning: datePicker.now.tzWarning,
+                    max_participants: 4,
+                    platform_id: this.$root.platforms[0]
+                },
+                dates: datePicker.dates,
+                hours: datePicker.hours,
+                minutes: datePicker.minutes,
+                platforms: this.$root.platforms,
+                periods: [ 'AM', 'PM' ],
             }
         },
         methods: {
             toggleVisible: function() {
                 this.group.visible = !this.group.visible
+            },
+            create: function() {
+                console.log('creating new event ', this.event)
+                this.$root.inProgress = true
+                this.$root.io.emit('create', this.event)
+                
+
             }
         }
     })
@@ -162,11 +181,12 @@ if(window.hasOwnProperty('Vue')) {
 
             that.io.on('events', function(data) {
                 that.platforms = data.platforms
-                
+                that.datePicker = data.datePicker
                 that.showPlatforms = data.platforms.length > 1
 
                 that.mergeVisible(that.groups, data.groups)
                 that.groups = data.groups
+                
 
                 that.inProgress = false
             })

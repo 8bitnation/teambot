@@ -1,10 +1,14 @@
 'use strict'
 
+const logger = require('./util/logger')
 const { User, Event, transaction } = require('./db')
 const discord = require('./discord')
 const moment = require('moment-timezone')
+const { range, padStart } = require('lodash')
 
 async function events(token) {
+
+    logger.debug('getting events for %s', token.user_id)
     // get a list of events that are visible for the roken
 
     // first we get the roles the user has
@@ -21,6 +25,7 @@ async function events(token) {
         })
 
     const tz = guser.tz || token.tz || 'UTC'
+    const tzWarning = !(guser.tz || token.tz)
 
     const groups = guser.groups.map( g => {
         return {
@@ -32,9 +37,10 @@ async function events(token) {
                 return {
                     visible: false,
                     id: e.id,
-                    platform: e.platform,
+                    platform: e.platform_id,
                     date: eventTime.format('ddd, MMM Do, hh:mm A'),
                     tz: eventTime.format('z'),
+                    tzWarning,
                     name: e.name,
                     max_participants: e.max_participants,
                     joined: e.participants.concat(e.alternatives).find( p => p.id === token.user_id ),
@@ -45,8 +51,31 @@ async function events(token) {
         }
     })
 
+    const now = moment().tz(tz)
+    const datePicker = {
+        /* eslint-disable no-magic-numbers */
+            
+        now: {
+            // get the closest 15 min period
+            minutes: padStart((parseInt(now.minutes()/15, 10) * 15) % 60, 2, '0'),
+            hour: now.hour() % 12 ? now.hour() % 12 : 12,
+            period: now.format('A'),
+            tz: now.format('z'),
+            tzWarning
+        },
+        // determine the next 14 days from today in the locale
+        // of the user
+        dates: range(0, 14).map( (d) => ({
+            value: now.add(d ? 1 : 0, 'd').format('YYYY-MM-DD'),
+            text: now.format('ddd Do MMM YYYY')
+        }) ),
+        hours: range(1, 13),
+        minutes: range(0, 60, 15).map( (m) => padStart(m, 2, '0'))
+    }
+
     //await Event.query()
     return {
+        datePicker,
         platforms,
         groups
     }
@@ -54,8 +83,27 @@ async function events(token) {
 
 async function createEvent(token, e) {
 
+    logger.debug('creating event %j %j', token, e)
     // creating an event does not require a transaction, however we still 
     // use one because the message update functions require it
+    if(!e.when) {
+        // assume this is from the UI
+
+        const when = moment(
+            e.date + padStart(e.hour, 2, '0') +
+            e.minutes + e.period + e.tz,
+            'YYYY-MM-DDhhmmAz'
+        ).toISOString()
+
+        e = {
+            name: e.name,
+            when,
+            platform_id: e.platform_id,
+            group_id: e.group_id,
+            max_participants: e.max_participants
+        }
+
+    }
 
     const knex = Event.knex()
     await transaction(knex, async(trx) => {
@@ -69,6 +117,7 @@ async function createEvent(token, e) {
 
 async function joinEvent(token, join) {
 
+    logger.debug('joining event %j %j', token, join)
     const knex = Event.knex()
     await transaction(knex, async(trx) => {
 
@@ -87,6 +136,8 @@ async function joinEvent(token, join) {
 }
 
 async function leaveEvent(token, leave) {
+
+    logger.debug('leaving event %j %j', token, leave)
     const knex = Event.knex()
     await transaction(knex, async(trx) => {
 
@@ -104,6 +155,7 @@ async function leaveEvent(token, leave) {
                 await discord.sendLeaveMessage(trx, event)
             } else {
                 // delete the event
+                logger.debug('deleting event %j %j', token, leave)
                 await Event.query(trx).deleteById(leave.event_id)
                 await discord.sendDeleteMessage(trx, event)
             }

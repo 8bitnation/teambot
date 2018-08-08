@@ -35,7 +35,7 @@
     <div class="container-fluid event">
         <div class="row event-header" v-on:click="toggleVisible">
             <div class="col-xs-1 col-sm-1">{{ event.visible ? '-' : '+' }}</div>
-            <div class="col-xs-11 col-sm-5 event-name">{{ event.name }}</div>
+            <div class="col-xs-11 col-sm-5 event-name">{{ event.platform }}|{{ event.name }}</div>
             <div class="col-xs-3 col-sm-2 event-count">
                 [{{ event.participants.length }}/{{event.max_participants}}&nbsp;+{{ event.alternatives.length }}]
             </div>
@@ -139,9 +139,9 @@
                         </select>   
                     </div>
                     <div class="col-xs-12 col-sm-5 picker">
-                        Reserved Places
-                        <select v-model="event.reserved">
-                            <option v-for="option in reservedSlots" v-bind:value="option">
+                        Platform
+                        <select v-model="event.platform_id">
+                            <option v-for="option in platforms" v-bind:value="option">
                                 {{ option }}
                             </option>
                         </select>   
