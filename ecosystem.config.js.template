@@ -1,0 +1,19 @@
+module.exports = {
+    /**
+     * Application configuration section
+     * http://pm2.keymetrics.io/docs/usage/application-declaration/
+     */
+    apps : [{
+        name      : 'teambot',
+        script    : 'index.js',
+        env: {
+          PORT: '3000',
+          DISCORD_TOKEN: '',
+          HOST_URL: 'http://<externalhost>',
+          DEBUG_LEVEL: 'info'
+        },
+        env_production : {
+          NODE_ENV: 'production'
+        }
+    }]
+  }

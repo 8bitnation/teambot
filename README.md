@@ -13,10 +13,14 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 
 2. git clone https://github.com/8bitnation/discord-danklebot.git
 3. npm install
-4. setup envionment
+4. edit ecosystem.config.js as required
 
         HOST_URL = https://db9c92d4.ngrok.io
         DISCORD_TOKEN = <BOT/BUILD-AT-BOT/TOKEN>
+
+5. start the bot via pm2 
+
+        npm run pm2 start
 
 # discord
 

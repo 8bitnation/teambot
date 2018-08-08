@@ -59,4 +59,5 @@ typings/
 
 .vscode
 db/*.sqlite
+ecosystem.config.js
 
