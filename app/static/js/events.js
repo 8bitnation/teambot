@@ -49,7 +49,13 @@ if(window.hasOwnProperty('Vue')) {
         props: ['event'],
         template: '#event-item-template',
         computed: {
-            canJoin: function() {
+            canJoinAsParticipant: function() {
+                return (
+                    this.event.participants.length < this.event.max_participants
+                    && !this.event.joined
+                )
+            },
+            canJoinAsAlternative: function() {
                 return !this.event.joined
             }
         },

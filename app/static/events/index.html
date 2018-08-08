@@ -51,7 +51,7 @@
                     v-bind:event="event"
                     v-bind:key="participant.id">
                 </participant-item>
-                <div v-if="canJoin" 
+                <div v-if="canJoinAsParticipant" 
                     v-on:click="join('participant')"
                     class="participant join">[ join ]
                 </div>
@@ -64,7 +64,7 @@
                     v-bind:event="event"
                     v-bind:key="alternative.id">
                 </alternative-item>
-                <div v-if="canJoin" 
+                <div v-if="canJoinAsAlternative" 
                     v-on:click="join('alternative')"
                     class="alternative join">[ join ]
                 </div>

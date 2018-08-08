@@ -91,6 +91,38 @@ exports.seed = async function(knex) {
         users: [{ id: 'u1' }, { id: 'u2' }, { id: 'u5' }]
     }, { relate: true })
 
+    // destiny events
+
+    await Event.query().insertGraph({
+        name: 'Bad Taste',
+        group_id: 'g1',
+        platform_id: 'PS',
+        max_participants: 4,
+        participants: [ { id: 'u1' }, { id: 'u6' }, { id: 'u7' } ],
+        alternatives: [ ],
+        when: future(1)
+    }, { relate: true })
+
+    await Event.query().insertGraph({
+        name: 'The Last Starfighter',
+        group_id: 'g1',
+        platform_id: 'PS',
+        max_participants: 6,
+        participants: [ { id: 'u1' }, { id: 'u2' }, { id: 'u5' } ],
+        alternatives: [ ],
+        when: future(3)
+    }, { relate: true })
+
+    await Event.query().insertGraph({
+        name: 'Starship Troopers',
+        group_id: 'g1',
+        platform_id: 'XB',
+        max_participants: 6,
+        participants: [ { id: 'u1' }, { id: 'u6' }, { id: 'u7' } ],
+        alternatives: [ ],
+        when: future(8)
+    }, { relate: true })
+
     // no man's sky events
 
     await Event.query().insertGraph({
@@ -101,6 +133,16 @@ exports.seed = async function(knex) {
         participants: [ { id: 'u7'} ],
         alternatives: [ ],
         when: future(1)
+    }, { relate: true })
+
+    await Event.query().insertGraph({
+        name: 'Blues Brothers',
+        group_id: 'g3',
+        platform_id: 'PS',
+        max_participants: 4,
+        participants: [ { id: 'u7'} ],
+        alternatives: [ ],
+        when: future(4)
     }, { relate: true })
 
     // warframe events
@@ -114,9 +156,24 @@ exports.seed = async function(knex) {
         when: future(2)
     }, { relate: true })
 
+    await Event.query().insertGraph({
+        name: 'Crouching Tiger',
+        group_id: 'g2',
+        platform_id: 'PS',
+        max_participants: 4,
+        participants: [ { id: 'u6' }, { id: 'u1' }],
+        alternatives: [ ],
+        when: future(1)
+    }, { relate: true })
+
 
     // tokens
     await Token.query().insert({ id: 't1', user_id: 'u1'})
+    await Token.query().insert({ id: 't2', user_id: 'u2'})
+    await Token.query().insert({ id: 't3', user_id: 'u3'})
+    await Token.query().insert({ id: 't4', user_id: 'u4'})
+    await Token.query().insert({ id: 't5', user_id: 'u5'})
+    await Token.query().insert({ id: 't6', user_id: 'u6'})
     await Token.query().insert({ id: 't7', user_id: 'u7'})
 
 }
