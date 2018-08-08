@@ -1,5 +1,5 @@
 'use strict'
-/* global Vue io */
+/* global Vue io jstz */
 /* eslint-disable no-console */
 
 if(window.hasOwnProperty('Vue')) {
@@ -141,8 +141,10 @@ if(window.hasOwnProperty('Vue')) {
                 if(c && c.length > 1) return c[1]
             })()
 
+            var tz = encodeURI(jstz.determine().name())
+
             var that = this
-            that.io = io('/events?token=' + token)
+            that.io = io('/events?token=' + token + '&tz=' + tz)
 
             that.io.on('connect', function() {
                 console.log('socket.io connected')

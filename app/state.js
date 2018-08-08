@@ -2,6 +2,7 @@
 
 const { User, Event, transaction } = require('./db')
 const discord = require('./discord')
+const moment = require('moment-timezone')
 
 async function events(token) {
     // get a list of events that are visible for the roken
@@ -19,17 +20,21 @@ async function events(token) {
             qb.whereIn('platform_id', platforms)
         })
 
+    const tz = guser.tz || token.tz || 'UTC'
+
     const groups = guser.groups.map( g => {
         return {
             visible: token.group_id === g.id,
             id: g.id,
             name: g.name,
             events: g.events.map( e => {
+                const eventTime = moment(e.when).tz(tz)
                 return {
                     visible: false,
                     id: e.id,
                     platform: e.platform,
-                    when: e.when,
+                    date: eventTime.format('ddd, MMM Do, hh:mm A'),
+                    tz: eventTime.format('z'),
                     name: e.name,
                     max_participants: e.max_participants,
                     joined: e.participants.concat(e.alternatives).find( p => p.id === token.user_id ),

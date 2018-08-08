@@ -29,6 +29,8 @@ module.exports = function(server) {
             return socket.emit('token', { error: 'invalid token'})
         }
 
+        token.tz = decodeURI(socket.handshake.query.tz)
+
         logger.info('found token %j', token)
 
         // check if token has expired?
