@@ -44,7 +44,7 @@ class Event extends Model {
                     through: {
                         from: 'event_alternative.event_id',
                         to: 'event_alternative.user_id',
-                        extra: { alternate_id: 'id', joined_at: 'created_at'}
+                        extra: { alternative_id: 'id', joined_at: 'created_at'}
                     },
                     to: 'user.id'
                 },

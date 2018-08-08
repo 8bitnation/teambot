@@ -18,7 +18,7 @@ router.get('/:token', async function(ctx) {
         return
     }
 
-    ctx.cookies.set(COOKIE_NAME, ctx.params.token)
+    ctx.cookies.set(COOKIE_NAME, ctx.params.token, { httpOnly: false })
     return ctx.redirect('/events')
 })
 

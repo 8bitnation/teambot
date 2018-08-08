@@ -19,8 +19,30 @@ async function events(token) {
             qb.whereIn('platform_id', platforms)
         })
 
+    const groups = guser.groups.map( g => {
+        return {
+            visible: token.group_id === g.id,
+            id: g.id,
+            name: g.name,
+            events: g.events.map( e => {
+                return {
+                    visible: false,
+                    platform: e.platform,
+                    when: e.when,
+                    name: e.name,
+                    max_participants: e.max_participants,
+                    participants: e.participants,
+                    alternatives: e.alternatives
+                }
+            })
+        }
+    })
+
     //await Event.query()
-    return guser
+    return {
+        platforms,
+        groups
+    }
 }
 
 async function createEvent(token, e) {

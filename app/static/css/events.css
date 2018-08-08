@@ -25,7 +25,7 @@ option {
   margin: auto;
 }
 
-.channel {
+.group {
   font-size: 22px;
   color: white;
   background-color: black;
@@ -35,11 +35,11 @@ option {
   cursor: pointer;
 }
 
-.channel-title {
+.group-title {
   text-align: center;
 }
 
-.channel-count {
+.group-count {
   text-align: right;
 }
 
