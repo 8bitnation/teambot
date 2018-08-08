@@ -27,6 +27,7 @@ async function events(token) {
             events: g.events.map( e => {
                 return {
                     visible: false,
+                    id: e.id,
                     platform: e.platform,
                     when: e.when,
                     name: e.name,

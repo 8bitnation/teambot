@@ -17,9 +17,17 @@
 
     <script type="text/x-template" id="participant-item-template">
     <div class="participant">{{ participant.name }}
-        <div class="leave" v-if="participant.canLeave" v-on:click="leave()">[ X ]
+        <div class="leave" v-if="canLeave" v-on:click="leave">[ X ]
         </div>
     </div>
+    </script>
+
+
+    <script type="text/x-template" id="alternative-item-template">
+        <div class="alternative">{{ alternative.name }}
+            <div class="leave" v-if="canLeave" v-on:click="leave">[ X ]
+            </div>
+        </div>
     </script>
 
     <script type="text/x-template" id="event-item-template">
@@ -48,17 +56,17 @@
                     class="participant join">[ join ]
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-6 participant-list">
+            <div class="col-xs-12 col-sm-6 alternative-list">
                 Alternatives [{{event.alternatives.length}}]
-                <participant-item 
+                <alternative-item 
                     v-for="alternative in event.alternatives"
-                    v-bind:participant="alternative"
+                    v-bind:alternative="alternative"
                     v-bind:event="event"
                     v-bind:key="alternative.id">
-                </participant-item>
+                </alternative-item>
                 <div v-if="canJoin" 
                     v-on:click="join('alternative')"
-                    class="participant join">[ join ]
+                    class="alternative join">[ join ]
                 </div>
             </div>
         </div>

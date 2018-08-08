@@ -86,13 +86,13 @@ option {
   margin-bottom: 10px;
 }
 
-.participant-list {
+.participant-list, .alternative-list {
   font-size: 16px;
   color: whitesmoke;
   margin-top: 4px;
 }
 
-.participant {
+.participant, .alternative {
   font-size: 16px;
   background-color: white;
   color: black;
@@ -111,7 +111,6 @@ option {
 .join {
   color: green;
 }
-
 
 .error {
   z-index: 1; /* Sit on top */

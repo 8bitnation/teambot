@@ -5,14 +5,41 @@
 if(window.hasOwnProperty('Vue')) {
 
 
+    Vue.component('alternative-item', {
+        props: ['alternative', 'event'],
+        template: '#alternative-item-template',
+        computed: {
+            canLeave: function() {
+                return this.alternative.id === this.$root.token.user_id
+            }
+        },
+        methods: {
+            leave: function() {
+                console.log('leaving: ' + this.event.id)
+                this.$root.inProgress = true
+                this.$root.io.emit('leave', { 
+                    event_id: this.event.id, type: 'alternative' 
+                })
+            }
+        }
+        
+    })
 
     Vue.component('participant-item', {
         props: ['participant', 'event'],
         template: '#participant-item-template',
+        computed: {
+            canLeave: function() {
+                return this.participant.id === this.$root.token.user_id
+            }
+        },
         methods: {
             leave: function() {
-                console.log('leaving: ' + event.id)
-
+                console.log('leaving: ' + this.event.id)
+                this.$root.inProgress = true
+                this.$root.io.emit('leave', { 
+                    event_id: this.event.id, type: 'participant' 
+                })
             }
         }
         
@@ -32,6 +59,8 @@ if(window.hasOwnProperty('Vue')) {
             },
             join: function(type) {
                 console.log('join as ' + type)
+                this.$root.inProgress = true
+                this.$root.io.emit('join', { event_id: this.event.id, type})
             }
         }
     })
