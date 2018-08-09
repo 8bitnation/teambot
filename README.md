@@ -20,7 +20,7 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 
 5. start the bot via pm2 
 
-        npm run pm2 start
+        npm run pm2 start teambot
 
 # discord
 
@@ -28,6 +28,10 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 - Convert it to a bot account
 - Get the client id and follow: https://discordapp.com/oauth2/authorize?scope=bot&client_id=CLIENT_ID
 - Get your token from the bot account page
+
+# updating the code from the repo
+
+        npm run pm2 pull teambot
 
 # Roles and Channel setup
 
