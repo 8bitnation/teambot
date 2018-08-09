@@ -103,11 +103,10 @@ if(window.hasOwnProperty('Vue')) {
                 this.group.visible = !this.group.visible
             },
             create: function() {
+                var that = this
                 console.log('creating new event ', this.event)
                 this.$root.inProgress = true
-                this.$root.io.emit('create', this.event)
-                
-
+                this.$root.io.emit('create', this.event, function() { that.newEvent = false })
             }
         }
     })
