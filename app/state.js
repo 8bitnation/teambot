@@ -157,8 +157,12 @@ async function leaveEvent(token, leave) {
                 await discord.sendLeaveMessage(trx, token, update)
             } else {
                 // delete the event
-                logger.debug('deleting event %j %j', token, leave)
-                await Event.query(trx).deleteById(leave.event_id)
+                logger.debug('deleting event %j %j', token, update)
+                // first clear out any alternatives
+                if(update.alternatives.length) {
+                    await knex('event_alternative').transacting(trx).del().where( { event_id: event.id })
+                }
+                await update.$query(trx).delete()
                 await discord.sendDeleteMessage(trx, token, update)
             }
             

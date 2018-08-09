@@ -233,7 +233,24 @@ describe('events', function() {
         const join = await db.Event.query().eager('[participants]').findById(1)
         expect(join.participants).to.have.length(1)
         expect(join.participants[0].id).to.equal('u2')
+    })
 
+    it('should delete an event when only alternatives remain', async function() {
+
+        // create group
+        await db.createGroup({ id: '1', name: 'destiny'})
+        // create user1
+        const s1 = await createUserAndSocket({ id: 'u1', name: 'user1' })
+        // create the event
+        await s1.create({ id: 1, name: 'test event', group_id: '1' })
+        // create user2
+        const s2 = await createUserAndSocket({ id: 'u2', name: 'user2' })
+        // join user2
+        await s2.join({ event_id: 1, type: 'alternative'})
+        // now user1 (owner) leaves
+        await s1.leave({ event_id: 1, type: 'participant' })
+        // check that we sent a delete message
+        expect(discord.sendDeleteMessage.callCount).to.equal(1)
 
     })
 
