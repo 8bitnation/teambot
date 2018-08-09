@@ -9,7 +9,10 @@ const logger = createLogger({
         timestamp(),
         printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
     ),
-    transports: [new transports.Console({ level: process.env.LOG_LEVEL || 'info' })]
+    transports: [new transports.Console({
+        handleExceptions: true,
+        level: process.env.LOG_LEVEL || 'info' 
+    })]
 })
 
 module.exports = logger
