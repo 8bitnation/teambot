@@ -1,6 +1,6 @@
 'use strict'
 /* global Vue io jstz */
-/* eslint-disable no-console */
+/* eslint-disable no-console, prefer-destructuring */
 
 if(window.hasOwnProperty('Vue')) {
 
@@ -75,7 +75,6 @@ if(window.hasOwnProperty('Vue')) {
         props: ['group'],
         template: '#group-item-template',
         data: function() {
-            // eslint-disable-next-line prefer-destructuring
             var datePicker = this.$root.datePicker
             return {
                 newEvent: false,
@@ -89,7 +88,7 @@ if(window.hasOwnProperty('Vue')) {
                     tz: datePicker.now.tz,
                     tzWarning: datePicker.now.tzWarning,
                     max_participants: 4,
-                    platform_id: this.$root.platforms[0]
+                    platform_id: this.$root.platforms.length > 1 ? '' : this.$root.platforms[0]
                 },
                 dates: datePicker.dates,
                 hours: datePicker.hours,
@@ -108,6 +107,10 @@ if(window.hasOwnProperty('Vue')) {
                 this.$root.io.emit('create', this.event)
                 // hide the new event div
                 this.newEvent = false
+            },
+            disableSubmit: function() {
+                // eslint-disable-next-line no-magic-numbers
+                return(this.event.name.length < 10 || this.event.platform_id === '')
             }
         }
     })

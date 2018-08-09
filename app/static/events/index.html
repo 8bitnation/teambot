@@ -151,7 +151,7 @@
                         <button type="button" 
                             class="btn btn-success"
                             v-on:click="create()"
-                            v-bind:disabled="event.name.length < 10">Submit</button>
+                            v-bind:disabled="disableSubmit()">Submit</button>
                     </div>
                     <div class="col-xs-3 col-sm-2 picker">
                         <button type="button" 
