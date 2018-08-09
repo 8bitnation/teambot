@@ -66,9 +66,9 @@ async function events(token) {
             tz: now.format('z'),
             tzWarning
         },
-        // determine the next 14 days from today in the locale
+        // determine the next 21 days from today in the locale
         // of the user
-        dates: range(0, 14).map( (d) => ({
+        dates: range(0, 21).map( (d) => ({
             value: now.add(d ? 1 : 0, 'd').format('YYYY-MM-DD'),
             text: now.format('ddd Do MMM YYYY')
         }) ),
