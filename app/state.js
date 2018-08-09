@@ -19,9 +19,11 @@ async function events(token) {
 
     // make a list of the platform id's
     const platforms = puser.platforms.map( p => p.id)
+    // don't display anything that was going to start more than 1 hour ago
+    const cutoff = moment().subtract(1, 'hour').toISOString()
     const guser = await puser.$query().eager('[groups, groups.events, groups.events.[participants, alternatives]]')
         .modifyEager('groups.events', qb => {
-            qb.whereIn('platform_id', platforms)
+            qb.whereIn('platform_id', platforms).andWhere('when', '>', cutoff)
         })
 
     const tz = token.user.tz || token.tz || 'UTC'
