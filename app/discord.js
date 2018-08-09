@@ -165,7 +165,7 @@ function sendCreateMessage(trx, token, event) {
     const msg = {
         embed: {
             color: 3447003,
-            description: '<@'+token.user_id+'> created event: **' + event.name + '**',
+            description: '**'+token.user.name+'** created event: **' + event.name + '**',
             timestamp: event.when,
             footer: { text: event.platform_id + ' | event starts' }
         }
@@ -179,7 +179,7 @@ function sendJoinMessage(trx, token, event) {
     const msg = {
         embed: {
             color: 3447003,
-            description: '<@'+token.user_id+'> joined event: **' + event.name + '**',
+            description: '**'+token.user.name+'** joined event: **' + event.name + '**',
             timestamp: event.when,
             footer: { text: event.platform_id + ' | event starts' },
             fields: [
@@ -210,7 +210,7 @@ function sendLeaveMessage(trx, token, event) {
     const msg = {
         embed: {
             color: 3447003,
-            description: '<@'+token.user_id+'> left event: **' + event.name + '**',
+            description: '**'+token.user.name+'** left event: **' + event.name + '**',
             timestamp: event.when,
             footer: { text: event.platform_id + ' | event starts' },
             fields: [
@@ -242,7 +242,7 @@ function sendDeleteMessage(trx, token, event) {
     const msg = {
         embed: {
             color: 3447003,
-            description: '<@'+token.user_id+'> deleted event: **' + event.name + '**',
+            description: '**'+token.user.name+'** deleted event: **' + event.name + '**',
         }
     }
     return updateEventMessage(trx, event, msg)
