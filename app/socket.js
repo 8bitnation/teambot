@@ -22,7 +22,7 @@ module.exports = function(server) {
         logger.info('connection from %s, token: %s', socket.id, token_id)
 
         // go grab the token
-        const token = await Token.query().findById(token_id)
+        const token = await Token.query().eager('[user]').findById(token_id)
 
         if(!token) {
             logger.error('failed to find token: %s', token_id)

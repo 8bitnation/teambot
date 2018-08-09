@@ -8,7 +8,7 @@ const { range, padStart } = require('lodash')
 
 async function events(token) {
 
-    logger.debug('getting events for %s', token.user_id)
+    logger.debug('getting events for token: %j', token)
     // get a list of events that are visible for the roken
 
     // first we get the roles the user has
@@ -24,8 +24,8 @@ async function events(token) {
             qb.whereIn('platform_id', platforms)
         })
 
-    const tz = guser.tz || token.tz || 'UTC'
-    const tzWarning = !(guser.tz || token.tz)
+    const tz = token.user.tz || token.tz || 'UTC'
+    const tzWarning = !(token.user.tz || token.tz)
 
     const groups = guser.groups.map( g => {
         return {
@@ -90,10 +90,13 @@ async function createEvent(token, e) {
     if(!e.when) {
         // assume this is from the UI
 
-        const when = moment(
-            e.date + padStart(e.hour, 2, '0') +
-            e.minutes + e.period + e.tz,
-            'YYYY-MM-DDhhmmAz'
+        // figure out the timezone
+        const tz = token.user.tz || token.tz || 'UTC'
+
+        const when = moment.tz(
+            e.date + padStart(e.hour, 2, '0') + e.minutes + e.period,
+            'YYYY-MM-DDhhmmA', 
+            tz
         ).toISOString()
 
         e = {
@@ -103,7 +106,6 @@ async function createEvent(token, e) {
             group_id: e.group_id,
             max_participants: e.max_participants
         }
-
     }
 
     const knex = Event.knex()
