@@ -17,7 +17,7 @@ describe('events', function() {
         await db.createUser(user)
         const token = await db.createToken({ user_id: user.id })
         const socket = new SocketHelper()
-        await socket.connectAndEvents(process.env.HOST_URL + '/events?token=' + token.id)
+        await socket.connectAndEvents(process.env.HOST_URL + '/events?tz=UTC&token=' + token.id )
         return socket
     }
 
@@ -48,7 +48,7 @@ describe('events', function() {
         // create the token
         const t = await db.createToken()
         const s = new SocketHelper()
-        const res = await s.connect(process.env.HOST_URL + '/events?token='+t.id)
+        const res = await s.connect(process.env.HOST_URL + '/events?tz=UTC&token='+t.id)
         expect(res).to.exist
         expect(res.id).to.equal(t.id)
     })
@@ -59,14 +59,14 @@ describe('events', function() {
         // create the token
         const t = await db.createToken()
         const s = new SocketHelper()
-        const res = await s.connectAndEvents(process.env.HOST_URL + '/events?token='+t.id)
+        const res = await s.connectAndEvents(process.env.HOST_URL + '/events?tz=UTC&token='+t.id)
         expect(res).to.exist
     })
 
     it('should send an error if the token does not exist', async function() {
 
         const s = new SocketHelper()
-        const res = await s.connect(process.env.HOST_URL + '/events?token=1')
+        const res = await s.connect(process.env.HOST_URL + '/events?tz=UTC&token=1')
         expect(res.error).to.exist
 
     })
@@ -322,14 +322,14 @@ describe('events', function() {
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 1, platform_id: 'PS', when: new Date().toDateString(),
+            id: 1, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event1',
             group_id: 'g1', participants: [ { id: 'u1'}, { id: 'u2'} ]
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 2, platform_id: 'PS', when: new Date().toDateString(),
+            id: 2, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
             group_id: 'g1', participants: [ { id: 'u1'} ],
@@ -337,7 +337,7 @@ describe('events', function() {
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 3, platform_id: 'PS', when: new Date().toDateString(),
+            id: 3, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
             group_id: 'g2', participants: [ { id: 'u2'} ]
@@ -346,7 +346,7 @@ describe('events', function() {
         // create a token and connect as user1
         const token = await db.createToken({ user_id: 'u1' })
         const socket = new SocketHelper()
-        const events = await socket.connectAndEvents(process.env.HOST_URL + '/events?token=' + token.id)
+        const events = await socket.connectAndEvents(process.env.HOST_URL + '/events?tz=UTC&token=' + token.id)
 
         expect(events.groups).to.have.length(1)
 
@@ -362,14 +362,14 @@ describe('events', function() {
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 1, platform_id: 'PS', when: new Date().toDateString(),
+            id: 1, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event1',
             group_id: 'g1', participants: [ { id: 'u1'}, { id: 'u2'} ]
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 2, platform_id: 'PS', when: new Date().toDateString(),
+            id: 2, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
             group_id: 'g1', participants: [ { id: 'u1'} ],
@@ -377,7 +377,7 @@ describe('events', function() {
         }, { relate: true })
 
         await db.Event.query().insertGraph({
-            id: 3, platform_id: 'XB', when: new Date().toDateString(),
+            id: 3, platform_id: 'XB', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
             group_id: 'g1', participants: [ { id: 'u2'} ]
@@ -386,7 +386,7 @@ describe('events', function() {
         // create a token and connect as user1
         const token = await db.createToken({ user_id: 'u1' })
         const socket = new SocketHelper()
-        const events = await socket.connectAndEvents(process.env.HOST_URL + '/events?token=' + token.id)
+        const events = await socket.connectAndEvents(process.env.HOST_URL + '/events?tz=UTC&token=' + token.id)
 
         const NUM_EVENTS = 2
         expect(events.groups).to.have.length(1)
