@@ -104,13 +104,18 @@ async function userRoles(user_id) {
  */
 async function userPlatforms(user_id) {
     const roles = await module.exports.userRoles(user_id)
-    const platforms = []
+    const platforms = await Platform.query()
+
+    // if we are a moderator, return all the platforms
+    if(process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE ))
+        return platforms.map( p => ({ id: p.id }) )
+
+    const up = []
     for(let r of roles) {
-        // eslint-disable-next-line no-await-in-loop
-        const platform = await Platform.query().first().where('role_id', r.id)
-        if(platform) platforms.push({ id: platform.id })
+        const platform = platforms.find( p => p.role_id === r.id)
+        if(platform) up.push({ id: platform.id })
     }
-    return platforms
+    return up
 }
 
 /**
@@ -119,13 +124,18 @@ async function userPlatforms(user_id) {
  */
 async function userGroups(user_id) {
     const roles = await module.exports.userRoles(user_id)
-    const groups = []
+    const groups = await Group.query()
+
+    // if we are a moderator, return all the groups
+    if(process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE ))
+        return groups.map( g => ({ id: g.id }) )
+
+    const ug = []
     for(let r of roles) {
-        // eslint-disable-next-line no-await-in-loop
-        const group = await Group.query().first().where('role_id', r.id)
-        if(group) groups.push({ id: group.id })
+        const group = groups.find( g => g.role_id === r.id)
+        if(group) ug.push({ id: group.id })
     }
-    return groups
+    return ug
 }
 
 async function updateEventMessage(trx, event, message) {
@@ -346,6 +356,7 @@ function login(token) {
 module.exports = { 
     login, messageHandler,
     guildRoles, syncRoles, userRoles, lfgChannels,
+    userGroups, userPlatforms,
     sendCreateMessage, sendJoinMessage,
     sendLeaveMessage, sendDeleteMessage
 }
