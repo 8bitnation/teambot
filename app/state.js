@@ -52,7 +52,7 @@ async function events(token) {
                 }
             }).sort( (a, b) => a.timestamp - b.timestamp )
         }
-    })
+    }).sort(( a, b) => a.name.localeCompare(b.name) )
 
     const now = moment().tz(tz)
     const datePicker = {
