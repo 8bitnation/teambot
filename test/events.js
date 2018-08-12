@@ -67,7 +67,7 @@ describe('events', function() {
 
         const s = new SocketHelper()
         const res = await s.connect(process.env.HOST_URL + '/events?tz=UTC&token=1')
-        expect(res.error).to.exist
+        expect(res.invalid).to.be.true
 
     })
 
