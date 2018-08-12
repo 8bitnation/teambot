@@ -41,6 +41,7 @@ describe('roles', function() {
 
     it('should return the correct groups', async function() {
 
+        sandbox.stub(discord, 'isAdmin').returns(false)
         await discord.syncRoles()
         // userRoles
         sandbox.stub(discord, 'userRoles').returns([
@@ -57,6 +58,7 @@ describe('roles', function() {
 
     it('should return the correct platforms', async function() {
 
+        sandbox.stub(discord, 'isAdmin').returns(false)
         await discord.syncRoles()
         // userRoles
         sandbox.stub(discord, 'userRoles').returns([
@@ -73,6 +75,7 @@ describe('roles', function() {
 
     it('should return all groups for a moderator', async function() {
 
+        sandbox.stub(discord, 'isAdmin').returns(false)
         process.env.MOD_ROLE = 'Moderator'
 
         await discord.syncRoles()
@@ -90,8 +93,27 @@ describe('roles', function() {
         expect(groups).to.deep.equal([{ id: 'g1'}, { id: 'g2' }, { id: 'g3'}])
     })
 
+    it('should return all groups for an admin', async function() {
+
+        sandbox.stub(discord, 'isAdmin').returns(true)
+
+        await discord.syncRoles()
+        // userRoles
+        sandbox.stub(discord, 'userRoles').returns([
+            { id: 'r1', name: 'Destiny', },
+            { id: 'r3', name: 'The Division' },
+            { id: 'r10', name: 'Xbox' }, 
+            { id: 'r11', name: 'PC'}
+        ])
+
+        const groups = await discord.userGroups()
+
+        expect(groups).to.deep.equal([{ id: 'g1'}, { id: 'g2' }, { id: 'g3'}])
+    })
+
     it('should return all platforms for a moderator', async function() {
 
+        sandbox.stub(discord, 'isAdmin').returns(false)
         process.env.MOD_ROLE = 'Moderator'
 
         await discord.syncRoles()
@@ -102,6 +124,24 @@ describe('roles', function() {
             { id: 'r10', name: 'Xbox' }, 
             { id: 'r11', name: 'PC'},
             { id: 'r20', name: 'Moderator' }
+        ])
+
+        const platforms = await discord.userPlatforms()
+
+        expect(platforms).to.deep.equal([{ id: 'PC'}, { id: 'PS'}, { id: 'XB'}, { id: 'N'}])
+    })
+
+    it('should return all platforms for an admin', async function() {
+
+        sandbox.stub(discord, 'isAdmin').returns(true)
+
+        await discord.syncRoles()
+        // userRoles
+        sandbox.stub(discord, 'userRoles').returns([
+            { id: 'r1', name: 'Destiny', },
+            { id: 'r3', name: 'The Division' },
+            { id: 'r10', name: 'Xbox' }, 
+            { id: 'r11', name: 'PC'}
         ])
 
         const platforms = await discord.userPlatforms()

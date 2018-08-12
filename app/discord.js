@@ -106,8 +106,11 @@ async function userPlatforms(user_id) {
     const roles = await module.exports.userRoles(user_id)
     const platforms = await Platform.query()
 
+    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const isAdmin = await module.exports.isAdmin(user_id)
+
     // if we are a moderator, return all the platforms
-    if(process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE ))
+    if(isMod || isAdmin)
         return platforms.map( p => ({ id: p.id }) )
 
     const up = []
@@ -126,8 +129,11 @@ async function userGroups(user_id) {
     const roles = await module.exports.userRoles(user_id)
     const groups = await Group.query()
 
+    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const isAdmin = await module.exports.isAdmin(user_id)
+
     // if we are a moderator, return all the groups
-    if(process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE ))
+    if(isMod || isAdmin)
         return groups.map( g => ({ id: g.id }) )
 
     const ug = []
@@ -136,6 +142,19 @@ async function userGroups(user_id) {
         if(group) ug.push({ id: group.id })
     }
     return ug
+}
+
+/**
+ * 
+ */
+async function isAdmin(user_id) {
+    const guild = client.guilds.get(process.env.DISCORD_GUILD)
+    if(!guild) return false
+
+    const member = await guild.fetchMember(user_id)
+
+    if(!member) return false
+    return member.hasPermission('ADMINISTRATOR')
 }
 
 async function updateEventMessage(trx, event, message) {
@@ -357,6 +376,7 @@ module.exports = {
     login, messageHandler,
     guildRoles, syncRoles, userRoles, lfgChannels,
     userGroups, userPlatforms,
+    isAdmin,
     sendCreateMessage, sendJoinMessage,
     sendLeaveMessage, sendDeleteMessage
 }
