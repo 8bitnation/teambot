@@ -78,7 +78,7 @@ If you have not already joined an event, you should see an item at the bottom of
 
 If you have already joined the event, you should see `[ x ]` to the right of your name.  Select this to leave the event.
 
-When the last participant leaves an event, the event will be removed, even if there are alernatives.
+When the last participant leaves an event, the event will be removed, even if there are alternatives.
 
 ## timezones
 
