@@ -64,13 +64,13 @@ Upon opening the web service you will be presented with a list of groups associa
 
 Selecting a group will expand or collapse it, showing or hiding any scheduled events.  The number to the right of the group name indicates the number of scheduled events in the group.
 
-If you issued the `/team` command in one of the `lfg` group associated with the bot, when you first visit the bot service or refresh the page, that grou[] should already be expanded showing any scheduled events for the group.
+If you issued the `/team` command in one of the `lfg` groups associated with the bot, when you first visit the bot service or refresh the page, that group should already be expanded showing any scheduled events for the group.
 
 You can create new events by selecting the `create new event` item at the bottom of the group list.  **Note:** There is currently no option to edit events.  If you have made a mistake with an event and no-one else has yet joined it, you can remove it by simply leaving it.
 
 ## events
 
-Selecting an event will expand or collapse it, showing or hiding the names of any participants or alternatives.  The numbers in square brackets are in the following format:
+Selecting an event will expand or collapse it, showing or hiding the names of any participants or alternatives.  The numbers in the square brackets are in the following format:
 
 `[ participants/max +alternatives ]`
 
