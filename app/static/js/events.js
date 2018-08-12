@@ -175,22 +175,35 @@ if(window.hasOwnProperty('Vue')) {
 
             that.io.on('disconnect', function() {
                 console.log('socket.io disconnected')
-                that.warning.message = 'disconnected from server'
+                if(!that.warning.message)
+                    that.warning.message = 'disconnected from server'
             })
 
             that.io.on('token', function(token) {
                 that.token = token
+                if(token.invalid) {
+                    that.warning.message = 'invalid token'
+                    that.inProgress = false
+                    that.io.close()
+                }
             })
 
             that.io.on('events', function(data) {
-                that.platforms = data.platforms
-                that.datePicker = data.datePicker
-                that.showPlatforms = data.platforms.length > 1
 
-                that.mergeVisible(that.groups, data.groups)
-                that.groups = data.groups
-                
+                if(data.error) {
+                    that.warning = data.error
+                } else {
+                    that.platforms = data.platforms
+                    that.datePicker = data.datePicker
+                    that.showPlatforms = data.platforms.length > 1
+    
+                    that.mergeVisible(that.groups, data.groups)
+                    that.groups = data.groups
+                }
 
+                if(!data.groups || !data.groups.length) {
+                    that.warning.message = 'no groups available'
+                }
                 that.inProgress = false
             })
 

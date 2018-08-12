@@ -26,7 +26,7 @@ module.exports = function(server) {
 
         if(!token) {
             logger.error('failed to find token: %s', token_id)
-            return socket.emit('token', { error: 'invalid token'})
+            return socket.emit('token', { invalid: true })
         }
 
         token.tz = decodeURI(socket.handshake.query.tz)
