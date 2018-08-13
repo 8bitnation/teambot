@@ -56,4 +56,17 @@ describe('ignore', function() {
 
         expect(msg.delete.called).to.be.true 
     })
+
+    it('should not ignore /lfg', async function() {
+        const msg = {
+            content: '/lfg',
+            id: '1234',
+            delete: sinon.stub(),
+            author: { id: '4567', send: sinon.stub() },
+            channel: { id: '3456', name: 'destiny_lfg' }
+        }
+        await messageHandler(msg)
+
+        expect(msg.delete.called).to.be.true 
+    })
 })

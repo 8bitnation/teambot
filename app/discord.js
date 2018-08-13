@@ -282,7 +282,7 @@ function sendDeleteMessage(trx, token, event) {
  * we have to be able to test this async, so we explicitly define and export it
  */
 async function messageHandler(msg) {
-    if(['/team', '!team'].some( cmd => msg.content.startsWith(cmd)) ) {
+    if(['/team', '!team', '/lfg'].some( cmd => msg.content.startsWith(cmd)) ) {
         // process the message
         logger.info('message received: %s %s', msg.id, msg.content)
         try {
