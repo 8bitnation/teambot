@@ -10,8 +10,17 @@ class Event extends Model {
     static get relationMappings() {
         const User = require('./user')
         const Group = require('./group')
+        const Platform = require('./platform')
 
         return {
+            platform: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Platform,
+                join: {
+                    from: 'event.platform_id',
+                    to: 'platform.id'
+                }
+            },
             group: {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Group,

@@ -55,7 +55,7 @@ async function syncRoles() {
             // update the platform role_id
             logger.debug('synchronising platform %s', p.name)
             // eslint-disable-next-line no-await-in-loop
-            await p.$query().patch({ role_id: role.id })
+            await p.$query().patch({ role_id: role.id, colour: role.hexColor })
         }
     }
 
@@ -191,90 +191,104 @@ async function updateEventMessage(trx, event, message) {
 function sendCreateMessage(trx, token, event) {
     // build a message
 
-    const msg = {
-        embed: {
-            color: 3447003,
-            description: '**'+token.user.name+'** created event: **' + event.name + '**',
-            timestamp: event.when,
-            footer: { text: event.platform_id + ' | event starts' }
-        }
+    const image = process.env.HOST_URL + event.platform.image
+
+    const embed = new Discord.RichEmbed()
+        .setColor(event.platform.colour)
+        .setAuthor(token.user.name, image)
+        .setDescription('created event | **' + event.name + '**')
+        .setTimestamp(event.when)
+        .setFooter('event scheduled')
+    
+    if(event.participants.length) {
+        embed.addField(
+            'Participants [' + event.participants.length + '/' + event.max_participants + ']', 
+            event.participants.map( p => p.name).join('\n') + '\u200B',
+            true
+        )        
     }
 
-    return updateEventMessage(trx, event, msg)
+    if(event.alternatives.length) {
+        embed.addField(
+            'Alternatives [' + event.alternatives.length + ']', 
+            event.alternatives.map( p => p.name).join('\n') + '\u200B',
+            true
+        )
+    }
+
+    return updateEventMessage(trx, event, { embed })
 }
 
 function sendJoinMessage(trx, token, event) {
     // build a message
-    const msg = {
-        embed: {
-            color: 3447003,
-            description: '**'+token.user.name+'** joined event: **' + event.name + '**',
-            timestamp: event.when,
-            footer: { text: event.platform_id + ' | event starts' },
-            fields: [
-                { 
-                    name: 'Participants [' + 
-                        event.participants.length + '/' + event.max_participants + ']',
-                    value: event.participants.map( p => p.name).join('\n'),
-                    inline: true
-                }
-            ]
-        }
+    const image = process.env.HOST_URL + event.platform.image
 
+    const embed = new Discord.RichEmbed()
+        .setColor(event.platform.colour)
+        .setAuthor(token.user.name, image)
+        .setDescription('joined event | **' + event.name + '**')
+        .setTimestamp(event.when)
+        .setFooter('event scheduled')
+    
+    if(event.participants.length) {
+        embed.addField(
+            'Participants [' + event.participants.length + '/' + event.max_participants + ']', 
+            event.participants.map( p => p.name).join('\n'),
+            true
+        )        
     }
 
     if(event.alternatives.length) {
-
-        msg.embed.fields.push({
-            name: 'Alternatives [+' + event.alternatives.length + ']',
-            value: event.alternatives.map( a => a.name).join('\n'),
-            inline: true
-        })
-
+        embed.addField(
+            'Alternatives [' + event.alternatives.length + ']', 
+            event.alternatives.map( p => p.name).join('\n'),
+            true
+        )
     }
-    return updateEventMessage(trx, event, msg)
+    return updateEventMessage(trx, event, { embed })
 }
 
 function sendLeaveMessage(trx, token, event) {
-    const msg = {
-        embed: {
-            color: 3447003,
-            description: '**'+token.user.name+'** left event: **' + event.name + '**',
-            timestamp: event.when,
-            footer: { text: event.platform_id + ' | event starts' },
-            fields: [
-                { 
-                    name: 'Participants [' + 
-                        event.participants.length + '/' + event.max_participants + ']',
-                    value: event.participants.map( p => p.name).join('\n'),
-                    inline: true
-                }
-            ]
-        }
+    const image = process.env.HOST_URL + event.platform.image
 
+    const embed = new Discord.RichEmbed()
+        .setColor(event.platform.colour)
+        .setAuthor(token.user.name, image)
+        .setDescription('left event | **' + event.name + '**')
+        .setTimestamp(event.when)
+        .setFooter('event scheduled')
+    
+    if(event.participants.length) {
+        embed.addField(
+            'Participants [' + event.participants.length + '/' + event.max_participants + ']', 
+            event.participants.map( p => p.name).join('\n'),
+            true
+        )        
     }
 
     if(event.alternatives.length) {
-
-        msg.embed.fields.push({
-            name: 'Alternatives [+' + event.alternatives.length + ']',
-            value: event.alternatives.map( a => a.name).join('\n'),
-            inline: true
-        })
-
+        embed.addField(
+            'Alternatives [' + event.alternatives.length + ']', 
+            event.alternatives.map( p => p.name).join('\n'),
+            true
+        )
     }
-    return updateEventMessage(trx, event, msg)
+    return updateEventMessage(trx, event, { embed })
 }
 
 
 function sendDeleteMessage(trx, token, event) {
-    const msg = {
-        embed: {
-            color: 3447003,
-            description: '**'+token.user.name+'** deleted event: **' + event.name + '**',
-        }
-    }
-    return updateEventMessage(trx, event, msg)
+    const image = process.env.HOST_URL + event.platform.image
+
+    const embed = new Discord.RichEmbed()
+        .setColor(event.platform.colour)
+        .setAuthor(token.user.name, image)
+        .setDescription('deleted event | **' + event.name + '**')
+        .setTimestamp(event.when)
+        .setFooter('event scheduled')
+    
+    return updateEventMessage(trx, event, { embed })
+
 }
 
 

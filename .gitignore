@@ -60,4 +60,5 @@ typings/
 .vscode
 db/*.sqlite
 ecosystem.config.js
+.DS_Store
 
