@@ -9,7 +9,7 @@ exports.up = async function(knex) {
     })
 
 
-    await knex('platform').where('id', 'PC').update('image', '/img/platform-pc.png')
+    await knex('platform').where('id', 'PC').update('image', '/img/platform-win7.png')
     await knex('platform').where('id', 'PS').update('image', '/img/platform-ps.png')
     await knex('platform').where('id', 'XB').update('image', '/img/platform-xb.png')
     await knex('platform').where('id', 'N').update('image', '/img/platform-n.png')
