@@ -35,11 +35,11 @@
     <div class="container-fluid event">
         <div class="row event-header" v-on:click="toggleVisible">
             <div class="col-xs-1 col-sm-1">{{ event.visible ? '-' : '+' }}</div>
-            <div class="col-xs-11 col-sm-5 event-name">{{ event.platform }}|{{ event.name }}</div>
-            <div class="col-xs-3 col-sm-2 event-count">
+            <div class="col-xs-10 col-sm-4 event-name">{{ event.platform }}|{{ event.name }}</div>
+            <div class="col-xs-2 col-sm-2 event-count">
                 [{{ event.participants.length }}/{{event.max_participants}}&nbsp;+{{ event.alternatives.length }}]
             </div>
-            <div class="col-xs-9 col-sm-4 event-date">
+            <div class="col-xs-10 col-sm-5 event-date">
                 <span>{{ event.date }}</span> <span v-bind:class="{ 'tz-warning': event.tzWarning }">{{ event.tz }}</span>
             </div>
         </div>
