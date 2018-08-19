@@ -118,6 +118,10 @@ select {
   color: red;
 }
 
+.tza {
+  float: right;
+}
+
 .join {
   color: green;
 }

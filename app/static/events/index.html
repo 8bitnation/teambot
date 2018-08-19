@@ -20,6 +20,8 @@
     <div class="participant">{{ participant.name }}
         <div class="leave" v-if="canLeave" v-on:click="leave">[ X ]
         </div>
+        <div class="tza" v-if="!canLeave && participant.tza">[{{ participant.tza }}]
+        </div>
     </div>
     </script>
 
@@ -27,6 +29,8 @@
     <script type="text/x-template" id="alternative-item-template">
         <div class="alternative">{{ alternative.name }}
             <div class="leave" v-if="canLeave" v-on:click="leave">[ X ]
+            </div>
+            <div class="tza" v-if="!canLeave && alternative.tza">[{{ alternative.tza }}]
             </div>
         </div>
     </script>

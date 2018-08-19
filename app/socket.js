@@ -30,6 +30,11 @@ module.exports = function(server) {
         }
 
         token.tz = decodeURI(socket.handshake.query.tz)
+        // check if the user has a timezone set
+        if(!token.user.tz && token.tz) {
+            // no, then set it to the browser
+            await token.user.$query().patch({ tz: token.tz })
+        }
 
         logger.info('found token %j', token)
 

@@ -36,6 +36,9 @@ async function events(token) {
             name: g.name,
             events: g.events.map( e => {
                 const eventTime = moment(e.when).tz(tz)
+                const tza = (tz) => moment(e.when).tz(tz).format('z')
+                e.participants.forEach( p => { if(p.tz) p.tza = tza(p.tz) })
+                e.alternatives.forEach( a => { if(a.tz) a.tza = tza(a.tz) } )
                 return {
                     visible: false,
                     id: e.id,
