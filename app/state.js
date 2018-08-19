@@ -36,6 +36,14 @@ async function events(token) {
             name: g.name,
             events: g.events.map( e => {
                 const eventTime = moment(e.when).tz(tz)
+                const vOffset = eventTime.utcOffset()
+                const calcOffset = (tz) => {
+                    const o = moment(e.when).tz(tz).utcOffset() - vOffset
+                    // eslint-disable-next-line no-magic-numbers
+                    return (o < 0 ? '-' : '+') + `0${Math.abs(o / 60 ^ 0)}`.slice(-2) + ':' + ('0' + o % 60).slice(-2)
+                }
+                e.participants.forEach( p => { p.offset = calcOffset(p.tz) } )
+                e.alternatives.forEach( a => { a.offset = calcOffset(a.tz) } )
                 return {
                     visible: false,
                     id: e.id,

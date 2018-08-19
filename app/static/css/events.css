@@ -118,6 +118,10 @@ select {
   color: red;
 }
 
+.offset {
+  float: right;
+}
+
 .join {
   color: green;
 }
