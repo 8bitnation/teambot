@@ -359,6 +359,8 @@ async function messageHandler(msg) {
 
 client.on('message', messageHandler)
 
+if(process.env.LOG_LEVEL === 'debug') client.on('debug', (msg) => logger.debug(msg))
+
 function login(token) {
 
     const p = new Promise((resolve, reject) => {
