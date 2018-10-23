@@ -104,4 +104,34 @@ describe('group', function() {
 
     })
 
+    it('should ignore a group without /team in the topic', async function() {
+
+        const guild = {
+            channels: { 
+                array: () => [
+                    { id: '1', name: 'destiny_lfg', topic: '/team' },
+                    { id: '2', name: 'no_mans_sky_lfg', topic: '' }
+                ]
+            },
+            roles: { 
+                array: () => [
+                    { id: '1', name: 'Destiny' },
+                    { id: '2', name: 'No Mans Sky' }
+                ]
+            }
+        }
+
+        sandbox.stub(discord.client.guilds, 'get').returns(guild)
+
+        await discord.syncRoles()
+
+        const group1 = await db.Group.query().findById('1')
+        expect(group1).to.exist
+        expect(group1.name).to.equal('Destiny')
+
+        const group2 = await db.Group.query().findById('2')
+        expect(group2).to.not.exist
+
+    })
+
 })
