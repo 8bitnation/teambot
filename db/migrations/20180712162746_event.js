@@ -8,10 +8,12 @@ exports.up = function(knex) {
         t.string('group_id').notNullable()
         t.string('platform_id').notNullable()
         t.integer('max_participants').notNullable()
+        t.string('channel_id').notNullable()
         t.string('message_id')
         t.timestamp('when').notNullable()
         t.foreign('group_id').references('id').inTable('group')
         t.foreign('platform_id').references('id').inTable('platform')
+        t.foreign('channel_id').references('id').inTable('channel')
     })
 }
 

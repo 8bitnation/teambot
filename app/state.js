@@ -1,7 +1,7 @@
 'use strict'
 
 const logger = require('./util/logger')
-const { User, Event, transaction } = require('./db')
+const { User, Event, Group, transaction } = require('./db')
 const discord = require('./discord')
 const moment = require('moment-timezone')
 const { range, padStart } = require('lodash')
@@ -9,7 +9,7 @@ const { range, padStart } = require('lodash')
 async function events(token) {
 
     logger.debug('getting events for token: %j', token)
-    // get a list of events that are visible for the roken
+    // get a list of events that are visible for the token
 
     // first we get the roles the user has
     //const roles = await discord.roles(token.user_id)
@@ -111,6 +111,17 @@ async function createEvent(token, e) {
             group_id: e.group_id,
             max_participants: e.max_participants
         }
+    }
+
+    // determine the channel
+    const group = await Group.query().eager('[channels]').findById(e.group_id)
+    const platformChannel = group.channels.find(c => c.platform_id === e.platform_id)
+    if(platformChannel) {
+        e.channel_id = platformChannel.id
+    } else {
+        // get the generic channel
+        const genericChannel = group.channels.find(c => c.platform_id === null)
+        e.channel_id = genericChannel.id
     }
 
     const knex = Event.knex()

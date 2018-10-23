@@ -14,49 +14,53 @@ const LFG_SUFFIX = '_lfg'
  */
 async function syncRoles() {
 
-    // we want to be able to stub these functions
-    // so we need to reference them via the module.exports
-    const lfg = module.exports.lfgChannels()
-    const roles = module.exports.guildRoles()
-
-    // loop through each channel and see if there is a corresponding role
-
-    for (let l of lfg) {
-        const name = l.name.slice(0, -LFG_SUFFIX.length).replace(/_/g, ' ').toLowerCase()
-        // do we have a role?
-        const role = roles.find( r => r.name.replace(/_/g, ' ').toLowerCase() === name )
-        if(role) {
-            logger.debug('synchronising channel %s / %s', l.name, name)
-            // check if the channel exists in the DB
-
-            // no need to rush
-            // eslint-disable-next-line no-await-in-loop
-            const group = await Group.query().findById(l.id)
-
-            if(!group) {
-                logger.info('creating group %s', name)
-                // eslint-disable-next-line no-await-in-loop
-                await Group.query().insert({ id: l.id, role_id: role.id, name })
-            } else {
-                // eslint-disable-next-line no-await-in-loop
-                await group.$query().patch({ role_id: role.id })
-            }
-
-        }
-    } 
+    const lfg = await lfgChannels()
+    const roles = await guildRoles()
 
     // loop through all the platforms
-
     const platforms = await Platform.query().select()
     for(let p of platforms) {
         // do we have a role with the same name?
-        const role = roles.find( r => r.name.toLowerCase() === p.name.toLowerCase())
+        const role = roles.find( r => r.name === p.name)
         if(role) {
             // update the platform role_id
             logger.debug('synchronising platform %s', p.name)
             // eslint-disable-next-line no-await-in-loop
             await p.$query().patch({ role_id: role.id, colour: role.hexColor })
         }
+    }
+
+    // loop through each role and check if there is a matching channel with the
+    // same name as the game
+    for(let r of roles) {
+
+        // we expect channels associated with platforms to have the following structure
+        // <game>_<platform>_lfg
+        
+        const channels = lfg.filter( c => c.group.toLowerCase() === r.name.toLowerCase())
+
+        if(!channels.length) continue
+
+        // collapse the channels into a graph upsert
+        const channelGraph = channels.map( c => ({
+            id: c.id, platform_id: c.platform, name: c.name
+        }))
+
+        logger.debug('synchronising role [%s] to channels %j', r.name, channelGraph)
+
+        // no need to rush
+        // eslint-disable-next-line no-await-in-loop
+        let group = await Group.query().findById(r.id)
+
+        if(!group) {
+            logger.info('creating group [%s]', r.name)
+            // eslint-disable-next-line no-await-in-loop
+            await Group.query().insertGraph({ id: r.id, name: r.name, channels: channelGraph })
+        } else {
+            // eslint-disable-next-line no-await-in-loop
+            await Group.query().upsertGraph({ id: group.id, name: group.name, channels: channelGraph }, { insertMissing: true })
+        }
+
     }
 
 }
@@ -73,15 +77,58 @@ function guildRoles() {
 }
 
 /**
+ * 
+ * @param {*} name
+ * 
+ * return the platform and group name 
+ */
+async function parseChannel(name) {
+    const platforms = await Platform.query().select()
+
+    // first try and match a platform
+    for(let p of platforms) {
+        const re = new RegExp('^(.*)_' + p.id + LFG_SUFFIX + '$', 'i')
+        const match = name.match(re)
+        if(match) return {
+            platform: p.id,
+            group: match[1]
+        }
+    }
+
+    const re = new RegExp('^(.*)' + LFG_SUFFIX + '$', 'i')
+    const match = name.match(re)
+    if(match) return {
+        group: match[1]
+    }
+
+}
+
+/**
  * return an array of channels ending with _lfg
  */
-function lfgChannels() {
+async function lfgChannels() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const lfg = guild.channels.filterArray( ch => ch.name.endsWith(LFG_SUFFIX))
+    const lfg = guild.channels.array().filter( 
+        // do an initial filter based on the name and topic
+        ch => ch.name.endsWith(LFG_SUFFIX) && ch.topic && ch.topic.match(/\/team/)
+    ).map( c => ({ id: c.id, name: c.name }) )
 
-    return lfg
+    // lfg channels dictate the groups/games
+    // so we have to pull the name to pieces to identify the group/game
+    // and possibly the platform
+    for(let l of lfg) {
+        // eslint-disable-next-line no-await-in-loop
+        const p = await parseChannel(l.name)
+        if(p) {
+            l.group = p.group.replace(/_/g, ' ')
+            l.platform = p.platform
+        }
+    }
+
+    // only return those that parsed a group/platform
+    return lfg.filter( l => l.group)
 }
 
 /**
@@ -103,14 +150,14 @@ async function userRoles(user_id) {
  * @param {*} user_id 
  */
 async function userPlatforms(user_id) {
-    const roles = await module.exports.userRoles(user_id)
+    const roles = await userRoles(user_id)
     const platforms = await Platform.query()
 
-    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await module.exports.isAdmin(user_id)
+    const mod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const admin = await isAdmin(user_id)
 
     // if we are a moderator, return all the platforms
-    if(isMod || isAdmin)
+    if(mod || admin)
         return platforms.map( p => ({ id: p.id }) )
 
     const up = []
@@ -126,22 +173,30 @@ async function userPlatforms(user_id) {
  * @param {*} user_id 
  */
 async function userGroups(user_id) {
-    const roles = await module.exports.userRoles(user_id)
-    const groups = await Group.query()
+    const roles = await userRoles(user_id)
+    const platforms = await userPlatforms(user_id)
+    const groups = await Group.query().eager('[channels]')
 
-    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await module.exports.isAdmin(user_id)
+    const mod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const admin = await isAdmin(user_id)
 
     // if we are a moderator, return all the groups
-    if(isMod || isAdmin)
+    if(mod || admin)
         return groups.map( g => ({ id: g.id }) )
 
-    const ug = []
-    for(let r of roles) {
-        const group = groups.find( g => g.role_id === r.id)
-        if(group) ug.push({ id: group.id })
-    }
-    return ug
+    return groups.filter( g => {
+        // is the group a role we belong to?
+        if(!roles.find( r => r.id === g.id )) return false
+
+        // is there a generic platform channel?
+        if(g.channels.find( c => c.platform_id === null)) return true
+
+        // look for a matching platform specific channel
+        for(let c of g.channels) {
+            if(platforms.find( p => p.id === c.platform_id)) return true
+        }
+        return false
+    }).map( g => ( { id: g.id } ) )
 }
 
 /**
@@ -161,7 +216,7 @@ async function updateEventMessage(trx, event, message) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
 
-    const channel = guild.channels.get(event.group_id)
+    const channel = guild.channels.get(event.channel_id)
     if(!channel) return logger.error('updateEventMessage: failed to find channel %s', event.channel_id)
 
     if(event.message_id) {
@@ -394,5 +449,7 @@ module.exports = {
     userGroups, userPlatforms,
     isAdmin,
     sendCreateMessage, sendJoinMessage,
-    sendLeaveMessage, sendDeleteMessage
+    sendLeaveMessage, sendDeleteMessage,
+    // for testing framework
+    client
 }

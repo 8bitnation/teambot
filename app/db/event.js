@@ -11,6 +11,7 @@ class Event extends Model {
         const User = require('./user')
         const Group = require('./group')
         const Platform = require('./platform')
+        const Channel = require('./channel')
 
         return {
             platform: {
@@ -27,6 +28,14 @@ class Event extends Model {
                 join: {
                     from: 'event.group_id',
                     to: 'group.id'
+                }
+            },
+            channel: {
+                relation: Model.BelongsToOneRelation,
+                modelClass: Channel,
+                join: {
+                    from: 'event.channel_id',
+                    to: 'channel.id'
                 }
             },
             participants: {

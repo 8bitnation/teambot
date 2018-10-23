@@ -29,9 +29,9 @@ exports.seed = async function(knex) {
     const users = await User.query().select()
     if(users.length) throw new Error('Database not empty!')
 
-    await Group.query().insert({ id: 'g1', role_id: 'r1', name: 'destiny'})
-    await Group.query().insert({ id: 'g2', role_id: 'r2', name: 'warframe'})
-    await Group.query().insert({ id: 'g3', role_id: 'r3', name: 'no mans sky'})
+    await Group.query().insert({ id: 'g1', name: 'destiny'})
+    await Group.query().insert({ id: 'g2', name: 'warframe'})
+    await Group.query().insert({ id: 'g3', name: 'no mans sky'})
 
     await User.query().insert({ id: 'u1', name: 'Retro'})
     await User.query().insert({ id: 'u2', name: 'BngPlz'})

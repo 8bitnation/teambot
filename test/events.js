@@ -329,8 +329,8 @@ describe('events', function() {
     })
 
     it('should only send events in groups we are enrolled', async function() {
-        await db.Group.query().insert({ id: 'g1', role_id: 'r1', name: 'group1' })
-        await db.Group.query().insert({ id: 'g2', role_id: 'r2', name: 'group2' })
+        await db.createGroup({ id: 'g1', name: 'group1'})
+        await db.createGroup({ id: 'g2', name: 'group2'})
         await db.User.query().insertGraph({ id: 'u1', name: 'user1', 
             groups: [{ id: 'g1' }], platforms: [ { id: 'PS' }]
         }, { relate: true })
@@ -342,6 +342,7 @@ describe('events', function() {
             id: 1, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event1',
+            channel_id: 'cg1',
             group_id: 'g1', participants: [ { id: 'u1'}, { id: 'u2'} ]
         }, { relate: true })
 
@@ -349,6 +350,7 @@ describe('events', function() {
             id: 2, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
+            channel_id: 'cg1',
             group_id: 'g1', participants: [ { id: 'u1'} ],
             alternatives: [ { id: 'u2' }]
         }, { relate: true })
@@ -356,7 +358,8 @@ describe('events', function() {
         await db.Event.query().insertGraph({
             id: 3, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
-            name: 'event2',
+            name: 'event3',
+            channel_id: 'cg2',
             group_id: 'g2', participants: [ { id: 'u2'} ]
         }, { relate: true })
 
@@ -370,7 +373,7 @@ describe('events', function() {
     })
 
     it('should only send events in platforms we are enrolled', async function() {
-        await db.Group.query().insert({ id: 'g1', role_id: 'r1', name: 'group1' })
+        await db.createGroup({ id: 'g1', name: 'group1'})
         await db.User.query().insertGraph({ id: 'u1', name: 'user1', 
             groups: [{ id: 'g1' }], platforms: [ { id: 'PS' }]
         }, { relate: true })
@@ -382,6 +385,7 @@ describe('events', function() {
             id: 1, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event1',
+            channel_id: 'cg1',
             group_id: 'g1', participants: [ { id: 'u1'}, { id: 'u2'} ]
         }, { relate: true })
 
@@ -389,6 +393,7 @@ describe('events', function() {
             id: 2, platform_id: 'PS', when: new Date().toISOString(),
             max_participants: 6,
             name: 'event2',
+            channel_id: 'cg1',
             group_id: 'g1', participants: [ { id: 'u1'} ],
             alternatives: [ { id: 'u2' }]
         }, { relate: true })
@@ -396,7 +401,8 @@ describe('events', function() {
         await db.Event.query().insertGraph({
             id: 3, platform_id: 'XB', when: new Date().toISOString(),
             max_participants: 6,
-            name: 'event2',
+            name: 'event3',
+            channel_id: 'cg1',
             group_id: 'g1', participants: [ { id: 'u2'} ]
         }, { relate: true })
 

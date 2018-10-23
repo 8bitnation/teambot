@@ -12,10 +12,10 @@ class Group extends Model {
         this.updated_at = new Date().toISOString()
     }
 
-
     static get relationMappings() {
         const Event = require('./event')
         const User = require('./user')
+        const Channel = require('./channel')
 
         return {
             events: {
@@ -38,6 +38,15 @@ class Group extends Model {
                     to: 'user.id'
                 }
             },
+            channels: {
+                relation: Model.HasManyRelation,
+                modelClass: Channel,
+                join: {
+                    from: 'group.id',
+                    to: 'channel.group_id'
+
+                }
+            }
         }
     }
 }
