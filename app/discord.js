@@ -5,7 +5,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const { format } = require('util')
 
-const { Token, User, Group, Platform, Channel } = require('./db')
+const { Token, User, Group, Platform } = require('./db')
 
 const LFG_SUFFIX = '_lfg'
 
@@ -153,11 +153,11 @@ async function userPlatforms(user_id) {
     const roles = await userRoles(user_id)
     const platforms = await Platform.query()
 
-    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await isAdmin(user_id)
+    const mod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const admin = await isAdmin(user_id)
 
     // if we are a moderator, return all the platforms
-    if(isMod || isAdmin)
+    if(mod || admin)
         return platforms.map( p => ({ id: p.id }) )
 
     const up = []
@@ -176,11 +176,11 @@ async function userGroups(user_id) {
     const roles = await userRoles(user_id)
     const groups = await Group.query()
 
-    const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await isAdmin(user_id)
+    const mod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
+    const admin = await isAdmin(user_id)
 
     // if we are a moderator, return all the groups
-    if(isMod || isAdmin)
+    if(mod || admin)
         return groups.map( g => ({ id: g.id }) )
 
     const ug = []
