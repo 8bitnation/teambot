@@ -14,10 +14,8 @@ const LFG_SUFFIX = '_lfg'
  */
 async function syncRoles() {
 
-    // we want to be able to stub these functions
-    // so we need to reference them via the module.exports
-    const lfg = await module.exports.lfgChannels()
-    const roles = await module.exports.guildRoles()
+    const lfg = await lfgChannels()
+    const roles = await guildRoles()
 
     // loop through all the platforms
     const platforms = await Platform.query().select()
@@ -41,28 +39,26 @@ async function syncRoles() {
         
         const channels = lfg.filter( c => c.group.toLowerCase() === r.name.toLowerCase())
 
+        if(!channels.length) continue
+
         // collapse the channels into a graph upsert
+        const channelGraph = channels.map( c => ({
+            id: c.id, platform_id: c.platform, name: c.name
+        }))
 
-        for(let c of channels) {
-            logger.debug('synchronising channel %s / %s', c.name, r.name)
+        logger.debug('synchronising role %s to channels %j', r.name, channelGraph)
 
-            // no need to rush
+        // no need to rush
+        // eslint-disable-next-line no-await-in-loop
+        let group = await Group.query().findById(r.id)
+
+        if(!group) {
+            logger.info('creating group %s', r.name)
             // eslint-disable-next-line no-await-in-loop
-            const group = await Group.query().findById(r.id)
-
-            if(!group) {
-                logger.info('creating group %s', r.name)
-                // eslint-disable-next-line no-await-in-loop
-                await Group.query().insert({ id: r.id, role_id: r.id, name: r.name })
-            }
-
-            // find the channel
-            const channel = await Channel.query().findById(c.id)
-            if(!channel) {
-                logger.info('creating channel %s', c.name)
-                // eslint-disable-next-line no-await-in-loop
-                await Channel.query().
-            }
+            await Group.query().insertGraph({ id: r.id, role_id: r.id, name: r.name, channels: channelGraph })
+        } else {
+            // eslint-disable-next-line no-await-in-loop
+            await group.$query().upsertGraph({ channels: channelGraph })
         }
 
     }
@@ -91,7 +87,7 @@ async function parseChannel(name) {
 
     // first try and match a platform
     for(let p of platforms) {
-        const re = new RegExp('^(.*)_' + p.id + '_lfg$', 'i')
+        const re = new RegExp('^(.*)_' + p.id + LFG_SUFFIX + '$', 'i')
         const match = name.match(re)
         if(match) return {
             platform: p.id,
@@ -99,7 +95,7 @@ async function parseChannel(name) {
         }
     }
 
-    const re = new RegExp('^(.*)_lfg$', 'i')
+    const re = new RegExp('^(.*)' + LFG_SUFFIX + '$', 'i')
     const match = name.match(re)
     if(match) return {
         group: match[1]
@@ -114,7 +110,8 @@ async function lfgChannels() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const lfg = guild.channels.filterArray( 
+    const lfg = guild.channels.array().filter( 
+        // do an initial filter based on the name and topic
         ch => ch.name.endsWith(LFG_SUFFIX) && ch.topic && ch.topic.match(/\/team/)
     ).map( c => ({ id: c.id, name: c.name }) )
 
@@ -125,12 +122,13 @@ async function lfgChannels() {
         // eslint-disable-next-line no-await-in-loop
         const p = await parseChannel(l.name)
         if(p) {
-            l.group = p.group
+            l.group = p.group.replace(/_/g, ' ')
             l.platform = p.platform
         }
     }
 
-    return lfg
+    // only return those that parsed a group/platform
+    return lfg.filter( l => l.group)
 }
 
 /**
@@ -152,11 +150,11 @@ async function userRoles(user_id) {
  * @param {*} user_id 
  */
 async function userPlatforms(user_id) {
-    const roles = await module.exports.userRoles(user_id)
+    const roles = await userRoles(user_id)
     const platforms = await Platform.query()
 
     const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await module.exports.isAdmin(user_id)
+    const isAdmin = await isAdmin(user_id)
 
     // if we are a moderator, return all the platforms
     if(isMod || isAdmin)
@@ -175,11 +173,11 @@ async function userPlatforms(user_id) {
  * @param {*} user_id 
  */
 async function userGroups(user_id) {
-    const roles = await module.exports.userRoles(user_id)
+    const roles = await userRoles(user_id)
     const groups = await Group.query()
 
     const isMod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
-    const isAdmin = await module.exports.isAdmin(user_id)
+    const isAdmin = await isAdmin(user_id)
 
     // if we are a moderator, return all the groups
     if(isMod || isAdmin)
@@ -443,5 +441,7 @@ module.exports = {
     userGroups, userPlatforms,
     isAdmin,
     sendCreateMessage, sendJoinMessage,
-    sendLeaveMessage, sendDeleteMessage
+    sendLeaveMessage, sendDeleteMessage,
+    // for testing framework
+    client
 }
