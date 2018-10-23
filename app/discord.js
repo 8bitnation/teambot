@@ -46,19 +46,19 @@ async function syncRoles() {
             id: c.id, platform_id: c.platform, name: c.name
         }))
 
-        logger.debug('synchronising role %s to channels %j', r.name, channelGraph)
+        logger.debug('synchronising role [%s] to channels %j', r.name, channelGraph)
 
         // no need to rush
         // eslint-disable-next-line no-await-in-loop
         let group = await Group.query().findById(r.id)
 
         if(!group) {
-            logger.info('creating group %s', r.name)
+            logger.info('creating group [%s]', r.name)
             // eslint-disable-next-line no-await-in-loop
             await Group.query().insertGraph({ id: r.id, name: r.name, channels: channelGraph })
         } else {
             // eslint-disable-next-line no-await-in-loop
-            await group.$query().upsertGraph({ channels: channelGraph })
+            await Group.query().upsertGraph({ id: group.id, name: group.name, channels: channelGraph }, { insertMissing: true })
         }
 
     }
@@ -216,7 +216,7 @@ async function updateEventMessage(trx, event, message) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
 
-    const channel = guild.channels.get(event.group_id)
+    const channel = guild.channels.get(event.channel_id)
     if(!channel) return logger.error('updateEventMessage: failed to find channel %s', event.channel_id)
 
     if(event.message_id) {

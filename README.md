@@ -2,8 +2,6 @@
 
 8bit Nation event scheduling bot
 
-This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning [go](http://golang.org)
-
 # Installation
 
 1. install node.js v8.11.0+
@@ -16,7 +14,7 @@ This is still in [node.js](http://nodejs.org) as a stop-gap whilst I'm learning 
 4. edit ecosystem.config.js as required
 
         HOST_URL = https://db9c92d4.ngrok.io
-        DISCORD_TOKEN = <BOT/BUILD-AT-BOT/TOKEN>
+        DISCORD_TOKEN = <BOT/BUILD-A-BOT/TOKEN>
 
 5. start the bot via pm2 
 
