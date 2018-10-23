@@ -55,7 +55,7 @@ async function syncRoles() {
         if(!group) {
             logger.info('creating group %s', r.name)
             // eslint-disable-next-line no-await-in-loop
-            await Group.query().insertGraph({ id: r.id, role_id: r.id, name: r.name, channels: channelGraph })
+            await Group.query().insertGraph({ id: r.id, name: r.name, channels: channelGraph })
         } else {
             // eslint-disable-next-line no-await-in-loop
             await group.$query().upsertGraph({ channels: channelGraph })

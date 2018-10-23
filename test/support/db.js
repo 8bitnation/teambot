@@ -36,11 +36,14 @@ async function createToken(opts) {
 function createGroup(opts) {
     const group = Object.assign({
         id: 'test-group-1',
-        role_id: '1',
         name: 'test-group'
     }, opts)
 
-    return db.Group.query().insert(group)
+    if(!group.channels) {
+        group.channels = [ { id: 'c' + group.id, name: group.name + '_lfg' } ]
+    }
+
+    return db.Group.query().insertGraph(group)
 
 }
 
