@@ -5,7 +5,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const { format } = require('util')
 
-const { Token, User, Group, Platform } = require('./db')
+const { Token, User, Group, Platform, Channel } = require('./db')
 
 const LFG_SUFFIX = '_lfg'
 
@@ -16,47 +16,55 @@ async function syncRoles() {
 
     // we want to be able to stub these functions
     // so we need to reference them via the module.exports
-    const lfg = module.exports.lfgChannels()
-    const roles = module.exports.guildRoles()
-
-    // loop through each channel and see if there is a corresponding role
-
-    for (let l of lfg) {
-        const name = l.name.slice(0, -LFG_SUFFIX.length).replace(/_/g, ' ').toLowerCase()
-        // do we have a role?
-        const role = roles.find( r => r.name.replace(/_/g, ' ').toLowerCase() === name )
-        if(role) {
-            logger.debug('synchronising channel %s / %s', l.name, name)
-            // check if the channel exists in the DB
-
-            // no need to rush
-            // eslint-disable-next-line no-await-in-loop
-            const group = await Group.query().findById(l.id)
-
-            if(!group) {
-                logger.info('creating group %s', name)
-                // eslint-disable-next-line no-await-in-loop
-                await Group.query().insert({ id: l.id, role_id: role.id, name })
-            } else {
-                // eslint-disable-next-line no-await-in-loop
-                await group.$query().patch({ role_id: role.id })
-            }
-
-        }
-    } 
+    const lfg = await module.exports.lfgChannels()
+    const roles = await module.exports.guildRoles()
 
     // loop through all the platforms
-
     const platforms = await Platform.query().select()
     for(let p of platforms) {
         // do we have a role with the same name?
-        const role = roles.find( r => r.name.toLowerCase() === p.name.toLowerCase())
+        const role = roles.find( r => r.name === p.name)
         if(role) {
             // update the platform role_id
             logger.debug('synchronising platform %s', p.name)
             // eslint-disable-next-line no-await-in-loop
             await p.$query().patch({ role_id: role.id, colour: role.hexColor })
         }
+    }
+
+    // loop through each role and check if there is a matching channel with the
+    // same name as the game
+    for(let r of roles) {
+
+        // we expect channels associated with platforms to have the following structure
+        // <game>_<platform>_lfg
+        
+        const channels = lfg.filter( c => c.group.toLowerCase() === r.name.toLowerCase())
+
+        // collapse the channels into a graph upsert
+
+        for(let c of channels) {
+            logger.debug('synchronising channel %s / %s', c.name, r.name)
+
+            // no need to rush
+            // eslint-disable-next-line no-await-in-loop
+            const group = await Group.query().findById(r.id)
+
+            if(!group) {
+                logger.info('creating group %s', r.name)
+                // eslint-disable-next-line no-await-in-loop
+                await Group.query().insert({ id: r.id, role_id: r.id, name: r.name })
+            }
+
+            // find the channel
+            const channel = await Channel.query().findById(c.id)
+            if(!channel) {
+                logger.info('creating channel %s', c.name)
+                // eslint-disable-next-line no-await-in-loop
+                await Channel.query().
+            }
+        }
+
     }
 
 }
@@ -73,13 +81,54 @@ function guildRoles() {
 }
 
 /**
+ * 
+ * @param {*} name
+ * 
+ * return the platform and group name 
+ */
+async function parseChannel(name) {
+    const platforms = await Platform.query().select()
+
+    // first try and match a platform
+    for(let p of platforms) {
+        const re = new RegExp('^(.*)_' + p.id + '_lfg$', 'i')
+        const match = name.match(re)
+        if(match) return {
+            platform: p.id,
+            group: match[1]
+        }
+    }
+
+    const re = new RegExp('^(.*)_lfg$', 'i')
+    const match = name.match(re)
+    if(match) return {
+        group: match[1]
+    }
+
+}
+
+/**
  * return an array of channels ending with _lfg
  */
-function lfgChannels() {
+async function lfgChannels() {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
     if(!guild) return []
 
-    const lfg = guild.channels.filterArray( ch => ch.name.endsWith(LFG_SUFFIX))
+    const lfg = guild.channels.filterArray( 
+        ch => ch.name.endsWith(LFG_SUFFIX) && ch.topic && ch.topic.match(/\/team/)
+    ).map( c => ({ id: c.id, name: c.name }) )
+
+    // lfg channels dictate the groups/games
+    // so we have to pull the name to pieces to identify the group/game
+    // and possibly the platform
+    for(let l of lfg) {
+        // eslint-disable-next-line no-await-in-loop
+        const p = await parseChannel(l.name)
+        if(p) {
+            l.group = p.group
+            l.platform = p.platform
+        }
+    }
 
     return lfg
 }
