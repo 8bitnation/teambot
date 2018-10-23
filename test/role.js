@@ -19,10 +19,12 @@ describe('roles', function() {
         guild = {
             channels: { 
                 array: () => [
-                    { id: 'c1', name: 'destiny_lfg', topic: '/team' },
-                    { id: 'c2', name: 'no_mans_sky_lfg', topic: '/team' },
-                    { id: 'c3', name: 'the_division_lfg', topic: '/team' },
-                    { id: 'c4', name: 'no_role_lfg' }
+                    { id: 'c1', name: 'destiny_xb_lfg', topic: '/team' },
+                    { id: 'c2', name: 'destiny_ps_lfg', topic: '/team' },
+                    { id: 'c3', name: 'destiny_pc_lfg', topic: '/team' },
+                    { id: 'c4', name: 'no_mans_sky_ps_lfg', topic: '/team' },
+                    { id: 'c5', name: 'the_division_lfg', topic: '/team' },
+                    { id: 'c6', name: 'no_role_lfg' }
                 ]
             },
             roles: { 
@@ -47,13 +49,36 @@ describe('roles', function() {
         sandbox.restore()
     })
 
-    it('should return the correct groups', async function() {
+
+    it('should include groups for platform', async function() {
 
         // 
         guild.fetchMember = () => ({
             roles: {
                 array: () => [
                     { id: 'r1', name: 'Destiny' },
+                    { id: 'r2', name: 'No Mans Sky' },
+                    { id: 'r3', name: 'The Division' },
+                    { id: 'r12', name: 'Playstation' }
+                ]
+            },
+            hasPermission: () => false
+        })
+
+        await discord.syncRoles()
+        const groups = await discord.userGroups()
+
+        expect(groups).to.deep.equal([{ id: 'r1'}, { id: 'r2' }, { id: 'r3'}])
+    })
+
+    it('should exclude groups for platform', async function() {
+
+        // 
+        guild.fetchMember = () => ({
+            roles: {
+                array: () => [
+                    { id: 'r1', name: 'Destiny' },
+                    { id: 'r2', name: 'No Mans Sky' },
                     { id: 'r3', name: 'The Division' },
                     { id: 'r10', name: 'Xbox' }, 
                     { id: 'r11', name: 'PC'} 

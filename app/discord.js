@@ -174,7 +174,8 @@ async function userPlatforms(user_id) {
  */
 async function userGroups(user_id) {
     const roles = await userRoles(user_id)
-    const groups = await Group.query()
+    const platforms = await userPlatforms(user_id)
+    const groups = await Group.query().eager('[channels]')
 
     const mod = process.env.MOD_ROLE && roles.find( r => r.name === process.env.MOD_ROLE )
     const admin = await isAdmin(user_id)
@@ -183,12 +184,19 @@ async function userGroups(user_id) {
     if(mod || admin)
         return groups.map( g => ({ id: g.id }) )
 
-    const ug = []
-    for(let r of roles) {
-        const group = groups.find( g => g.role_id === r.id)
-        if(group) ug.push({ id: group.id })
-    }
-    return ug
+    return groups.filter( g => {
+        // is the group a role we belong to?
+        if(!roles.find( r => r.id === g.id )) return false
+
+        // is there a generic platform channel?
+        if(g.channels.find( c => c.platform_id === null)) return true
+
+        // look for a matching platform specific channel
+        for(let c of g.channels) {
+            if(platforms.find( p => p.id === c.platform_id)) return true
+        }
+        return false
+    }).map( g => ( { id: g.id } ) )
 }
 
 /**
