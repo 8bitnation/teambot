@@ -53,8 +53,11 @@ function createUser(opts) {
         name: 'test-user'
     }, opts)
 
-    return db.User.query().insert(user)
+    return db.User.query().insertGraph(user, { relate: true, unrelate: true })
 }
 
-module.exports = { init, createGroup, createToken, createUser, Group, User, Token, Event }
+module.exports = { 
+    init, createGroup, createToken, 
+    createUser, Group, User, Token, Event
+}
 
