@@ -2,22 +2,14 @@
 
 const logger = require('../util/logger')
 const Router = require('koa-router')
-const Token = require('../db/token')
-const { HTTP_UNAUTHORIZED, COOKIE_NAME } = require('../util/const')
+const { COOKIE_NAME } = require('../util/const')
 
 const router = new Router({ prefix: '/auth' })
 
-router.get('/:token', async function(ctx) {
-    // lookup the token
-    logger.debug('%s retrieving token %s', ctx.id, ctx.params.token)
-
-    const token = await Token.query().findById(ctx.params.token)
-
-    if(!token) {
-        ctx.status = HTTP_UNAUTHORIZED
-        return
-    }
-
+router.get('/:token', function(ctx) {
+    logger.debug('%s auth redirect for token %s', ctx.id, ctx.params.token)
+    // pass though token lookup until later
+    // just set the cookie
     ctx.cookies.set(COOKIE_NAME, ctx.params.token, { httpOnly: false })
     return ctx.redirect('/events')
 })
