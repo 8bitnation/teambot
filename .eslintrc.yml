@@ -38,9 +38,6 @@ rules:
     - warn
   no-implied-eval:
     - error
-  complexity:
-    - warn
-    - max: 15
   no-implicit-coercion:
     - warn
   no-implicit-globals:

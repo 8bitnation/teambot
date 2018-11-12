@@ -5,7 +5,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 const { format } = require('util')
 
-const { Token, User, Group, Platform } = require('./db')
+const { Token, User, Group, Platform, Channel } = require('./db')
 
 const LFG_SUFFIX = '_lfg'
 
@@ -382,20 +382,30 @@ async function messageHandler(msg) {
         // create everything from new
         try {
             // create the user
+            const groups = await userGroups(msg.author.id)
+            const platforms = await userPlatforms(msg.author.id)
+
+            if(!groups || !groups.length) {
+                return msg.author.send('You do not appear to belong to a valid game.  Please join one and try again')
+            }
+
+            if(!platforms || !platforms.length) {
+                return msg.author.send('You do not appear to belong to a valid platform.  Please join one and try again')
+            }
+
             const user = await User.query().upsertGraph({
                 id: msg.author.id,
                 name: msg.member.nickname || msg.author.username,
-                groups: await userGroups(msg.author.id),
-                platforms: await userPlatforms(msg.author.id)
+                groups, platforms
             }, { insertMissing: true, relate: true, unrelate: true })
 
             // check if the group exists first
-            const group = await Group.query().findById(msg.channel.id)
+            const channel = await Channel.query().findById(msg.channel.id)
 
             // create the token
             const token = await Token.query().insert({
                 user_id: user.id,
-                group_id: group ? group.id : null
+                group_id: channel ? channel.group_id : null
             })
 
             const message = await msg.author.send('Please click on the following link to use the team tool: ' + 
