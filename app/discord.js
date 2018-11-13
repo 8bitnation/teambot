@@ -214,7 +214,7 @@ async function isAdmin(user_id) {
 
 async function updateEventMessage(trx, event, message) {
     const guild = client.guilds.get(process.env.DISCORD_GUILD)
-    message.embed.addField('──────────', 'Time shown below is local.  Android will incorrectly show future dates as today')
+    message.embed.addField('─', '*Time shown below is in your timezone.  Android will incorrectly show future dates as today*')
     if(!guild) return logger.error('updateEventMessage: failed to find guild %s', process.env.DISCORD_GUILD)
 
     const channel = guild.channels.get(event.channel_id)
